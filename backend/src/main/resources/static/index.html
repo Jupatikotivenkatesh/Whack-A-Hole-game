@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole: Coding Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-content">
+            <h1>🎯 Whack-a-Mole: Ultimate Edition</h1>
+            <p>Choose your adventure and start whacking!</p>
+            <button class="start-button" id="startButton">Choose Theme</button>
+        </div>
+    </div>
+
+    <!-- Theme Selection Screen -->
+    <div class="theme-selection" id="themeSelection">
+        <div class="theme-content">
+            <h2>🎨 Choose Your Theme</h2>
+            <div class="theme-grid" id="themeGrid">
+                <div class="theme-option" data-theme="defender">
+                    <div class="theme-icon">🛡️</div>
+                    <div class="theme-name">Defender</div>
+                </div>
+                <div class="theme-option" data-theme="space">
+                    <div class="theme-icon">🚀</div>
+                    <div class="theme-name">Space Defender</div>
+                </div>
+                <div class="theme-option" data-theme="zombie">
+                    <div class="theme-icon">🧟</div>
+                    <div class="theme-name">Zombie Survival</div>
+                </div>
+                <div class="theme-option" data-theme="jungle">
+                    <div class="theme-icon">🦁</div>
+                    <div class="theme-name">Jungle Hunter</div>
+                </div>
+                <div class="theme-option" data-theme="food">
+                    <div class="theme-icon">🍔</div>
+                    <div class="theme-name">Food Fight</div>
+                </div>
+                <div class="theme-option" data-theme="environment">
+                    <div class="theme-icon">🌍</div>
+                    <div class="theme-name">Environment Protector</div>
+                </div>
+                <div class="theme-option" data-theme="cyber">
+                    <div class="theme-icon">🤖</div>
+                    <div class="theme-name">Cyber Robot Battle</div>
+                </div>
+                <div class="theme-option" data-theme="cricket">
+                    <div class="theme-icon">🏏</div>
+                    <div class="theme-name">Cricket Challenge</div>
+                </div>
+                <div class="theme-option" data-theme="treasure">
+                    <div class="theme-icon">💎</div>
+                    <div class="theme-name">Treasure Hunter</div>
+                </div>
+                <div class="theme-option" data-theme="crime">
+                    <div class="theme-icon">👮</div>
+                    <div class="theme-name">City Crime Buster</div>
+                </div>
+            </div>
+
+            <div class="difficulty-selection">
+                <h3>⚡ Select Difficulty</h3>
+                <div class="difficulty-options">
+                    <button class="difficulty-btn" data-difficulty="easy">
+                        <div>🟢 Easy</div>
+                        <div class="difficulty-info">1.7s hover time</div>
+                    </button>
+                    <button class="difficulty-btn selected" data-difficulty="medium">
+                        <div>🟡 Medium</div>
+                        <div class="difficulty-info">1.4s hover time</div>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="hard">
+                        <div>🔴 Hard</div>
+                        <div class="difficulty-info">1.25s hover time</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Theme Scoring Info -->
+            <div class="theme-scoring-info" id="themeScoringInfo">
+                <div class="scoring-title">📊 Scoring Rules</div>
+                <div class="scoring-item positive">
+                    <div class="scoring-icon" id="goodIcon">🛡️</div>
+                    <div class="scoring-text" id="goodText">Click Shields to defend</div>
+                    <div class="scoring-points positive">+10</div>
+                </div>
+                <div class="scoring-item negative">
+                    <div class="scoring-icon" id="badIcon">⚔️</div>
+                    <div class="scoring-text" id="badText">Avoid Swords</div>
+                    <div class="scoring-points negative">-5</div>
+                </div>
+            </div>
+
+            <button class="proceed-button" id="proceedButton" disabled>Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Layout -->
+    <div class="game-layout">
+        <!-- Main Game Area -->
+        <div class="main-game-area">
+            <!-- HUD -->
+            <div class="hud">
+                <div class="score">Score: <span id="scoreValue">0</span></div>
+                <div class="timer">Time: <span id="timerValue">45</span>s</div>
+            </div>
+
+            <!-- 3x3 Grid -->
+            <div class="grid-container" id="gridContainer">
+                <div class="hole" data-hole="0"></div>
+                <div class="hole" data-hole="1"></div>
+                <div class="hole" data-hole="2"></div>
+                <div class="hole" data-hole="3"></div>
+                <div class="hole" data-hole="4"></div>
+                <div class="hole" data-hole="5"></div>
+                <div class="hole" data-hole="6"></div>
+                <div class="hole" data-hole="7"></div>
+                <div class="hole" data-hole="8"></div>
+            </div>
+        </div>
+
+        <!-- Score History Sidebar -->
+        <div class="score-history">
+            <h2>🏆 Score History</h2>
+            <div class="history-list" id="historyList">
+                <div class="no-history">No games played yet. Start playing to see your scores!</div>
+            </div>
+            <button class="clear-history" id="clearHistory">Clear History</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2>🎮 Game Over!</h2>
+            <p>Final Score:</p>
+            <span class="final-score-value" id="finalScore">0</span>
+            <div class="motivational-message" id="motivationalMessage"></div>
+            <div class="score-comparison" id="scoreComparison" style="display: none;"></div>
+            <button class="try-again-button" id="tryAgainButton">Try Again</button>
+        </div>
+    </div>
+
+    <script src="/js/game.js"></script>
+</body>
+</html>

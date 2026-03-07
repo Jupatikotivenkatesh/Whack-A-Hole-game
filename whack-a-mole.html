@@ -344,6 +344,7 @@
             font-size: 20px;
             font-weight: 700;
             color: #34d399;
+            text-align: right;
         }
 
         .history-date {
@@ -1471,13 +1472,91 @@
             const previousBestScore = history.length > 0 ? history[0].score : null;
             const lastScore = history.length > 0 ? history[0].score : null;
             
-            // Save current score to history
+            // Save current score to history (localStorage)
             saveScore(score);
+            
+            // Save score to backend
+            saveScoreToBackend(score);
             
             // Display motivational message
             displayMotivationalMessage(score, previousBestScore, lastScore, history.length === 0);
             
             finalScoreElement.textContent = score;
+            gameOver.style.display = 'flex';
+        }
+
+        // Save score to backend API
+        async function saveScoreToBackend(finalScore) {
+            const playerName = prompt('Enter your name for the leaderboard:', 'Player') || 'Anonymous';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/scores', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        playerName: playerName,
+                        score: finalScore,
+                        theme: selectedTheme,
+                        difficulty: selectedDifficulty
+                    })
+                });
+                
+                if (response.ok) {
+                    console.log('Score saved to backend successfully');
+                    // Refresh leaderboard
+                    loadLeaderboard();
+                } else {
+                    console.error('Failed to save score to backend');
+                }
+            } catch (error) {
+                console.error('Error saving score to backend:', error);
+                // Fallback to localStorage only
+            }
+        }
+
+        // Load leaderboard from backend
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('http://localhost:8080/api/leaderboard');
+                if (response.ok) {
+                    const leaderboard = await response.json();
+                    displayBackendLeaderboard(leaderboard);
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        // Display backend leaderboard
+        function displayBackendLeaderboard(leaderboard) {
+            if (leaderboard.length === 0) {
+                historyList.innerHTML = '<div class="no-history">No games played yet. Be the first on the leaderboard!</div>';
+                return;
+            }
+
+            historyList.innerHTML = leaderboard.map((entry, index) => {
+                const date = new Date(entry.date);
+                const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const themeIcon = entry.theme ? themes[entry.theme]?.good || '🎮' : '🎮';
+                return `
+                    <div class="history-item">
+                        <div>
+                            <div class="history-rank">#${index + 1}</div>
+                            <div class="history-date">${entry.playerName}</div>
+                        </div>
+                        <div>
+                            <div class="history-score">${entry.score}</div>
+                            <div class="history-date">${themeIcon} ${entry.difficulty || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load leaderboard on page load
+        loadLeaderboard();
             gameOver.style.display = 'flex';
         }
 
