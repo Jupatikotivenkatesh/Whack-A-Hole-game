@@ -617,10 +617,177 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
-        /* Responsive Design */
+        /* Theme Selection Screen */
+        .theme-selection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .theme-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+        }
+
+        .theme-content h2 {
+            color: #e0e7ff;
+            font-size: 36px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .theme-option {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.6);
+            background: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        .theme-option.selected {
+            border-color: rgba(16, 185, 129, 0.8);
+            background: rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .theme-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .theme-name {
+            color: #e0e7ff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Difficulty Selection */
+        .difficulty-selection {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .difficulty-selection h3 {
+            color: #cbd5e1;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-options {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            border-radius: 12px;
+            padding: 16px 32px;
+            color: #cbd5e1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(139, 92, 246, 0.6);
+            background: rgba(139, 92, 246, 0.2);
+        }
+
+        .difficulty-btn.selected {
+            border-color: rgba(16, 185, 129, 0.8);
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .difficulty-info {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .proceed-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 22px;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 
+                0 10px 30px rgba(16, 185, 129, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 20px;
+        }
+
+        .proceed-button:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 0 40px rgba(16, 185, 129, 0.8),
+                0 15px 40px rgba(16, 185, 129, 0.5);
+        }
+
+        .proceed-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         @media (max-width: 1200px) {
             .score-history {
                 display: none;
+            }
+            
+            .theme-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -635,12 +802,20 @@
                 font-size: 48px;
             }
 
-            .start-content {
+            .start-content, .theme-content {
                 padding: 40px 30px;
             }
 
-            .start-screen h1 {
-                font-size: 36px;
+            .start-screen h1, .theme-content h2 {
+                font-size: 32px;
+            }
+            
+            .theme-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .difficulty-options {
+                flex-direction: column;
             }
         }
     </style>
@@ -649,14 +824,78 @@
     <!-- Start Screen -->
     <div class="start-screen" id="startScreen">
         <div class="start-content">
-            <h1>🎯 Whack-a-Mole 🎯</h1>
-            <p>Whack the Bugs (Red) and save the Best Practices (Green)!</p>
-            <div class="instructions">
-                <p>🐛 Click RED bugs = +10 points</p>
-                <p>✨ Avoid GREEN best practices = -5 points</p>
-                <p>⏱️ 30 seconds to get the highest score!</p>
+            <h1>🎯 Whack-a-Mole: Ultimate Edition</h1>
+            <p>Choose your adventure and start whacking!</p>
+            <button class="start-button" id="startButton">Choose Theme</button>
+        </div>
+    </div>
+
+    <!-- Theme Selection Screen -->
+    <div class="theme-selection" id="themeSelection">
+        <div class="theme-content">
+            <h2>🎨 Choose Your Theme</h2>
+            <div class="theme-grid" id="themeGrid">
+                <div class="theme-option" data-theme="defender">
+                    <div class="theme-icon">🛡️</div>
+                    <div class="theme-name">Defender</div>
+                </div>
+                <div class="theme-option" data-theme="space">
+                    <div class="theme-icon">🚀</div>
+                    <div class="theme-name">Space Defender</div>
+                </div>
+                <div class="theme-option" data-theme="zombie">
+                    <div class="theme-icon">🧟</div>
+                    <div class="theme-name">Zombie Survival</div>
+                </div>
+                <div class="theme-option" data-theme="jungle">
+                    <div class="theme-icon">🦁</div>
+                    <div class="theme-name">Jungle Hunter</div>
+                </div>
+                <div class="theme-option" data-theme="food">
+                    <div class="theme-icon">🍔</div>
+                    <div class="theme-name">Food Fight</div>
+                </div>
+                <div class="theme-option" data-theme="environment">
+                    <div class="theme-icon">🌍</div>
+                    <div class="theme-name">Environment Protector</div>
+                </div>
+                <div class="theme-option" data-theme="cyber">
+                    <div class="theme-icon">🤖</div>
+                    <div class="theme-name">Cyber Robot Battle</div>
+                </div>
+                <div class="theme-option" data-theme="cricket">
+                    <div class="theme-icon">🏏</div>
+                    <div class="theme-name">Cricket Challenge</div>
+                </div>
+                <div class="theme-option" data-theme="treasure">
+                    <div class="theme-icon">💎</div>
+                    <div class="theme-name">Treasure Hunter</div>
+                </div>
+                <div class="theme-option" data-theme="crime">
+                    <div class="theme-icon">👮</div>
+                    <div class="theme-name">City Crime Buster</div>
+                </div>
             </div>
-            <button class="start-button" id="startButton">Start Game</button>
+
+            <div class="difficulty-selection">
+                <h3>⚡ Select Difficulty</h3>
+                <div class="difficulty-options">
+                    <button class="difficulty-btn" data-difficulty="easy">
+                        <div>🟢 Easy</div>
+                        <div class="difficulty-info">1.2s hover time</div>
+                    </button>
+                    <button class="difficulty-btn selected" data-difficulty="medium">
+                        <div>🟡 Medium</div>
+                        <div class="difficulty-info">0.9s hover time</div>
+                    </button>
+                    <button class="difficulty-btn" data-difficulty="hard">
+                        <div>🔴 Hard</div>
+                        <div class="difficulty-info">0.75s hover time</div>
+                    </button>
+                </div>
+            </div>
+
+            <button class="proceed-button" id="proceedButton" disabled>Start Game</button>
         </div>
     </div>
 
@@ -667,7 +906,7 @@
             <!-- HUD -->
             <div class="hud">
                 <div class="score">Score: <span id="scoreValue">0</span></div>
-                <div class="timer">Time: <span id="timerValue">30</span>s</div>
+                <div class="timer">Time: <span id="timerValue">45</span>s</div>
             </div>
 
             <!-- 3x3 Grid -->
@@ -713,19 +952,45 @@
             ENDED: 'ended'
         };
 
+        // Theme configurations
+        const themes = {
+            defender: { good: '🛡️', bad: '⚔️', goodLabel: 'Shield', badLabel: 'Sword' },
+            space: { good: '🚀', bad: '👾', goodLabel: 'Rocket', badLabel: 'Alien' },
+            zombie: { good: '💊', bad: '🧟', goodLabel: 'Medicine', badLabel: 'Zombie' },
+            jungle: { good: '🌿', bad: '🐍', goodLabel: 'Plant', badLabel: 'Snake' },
+            food: { good: '🥗', bad: '🍔', goodLabel: 'Healthy Food', badLabel: 'Junk Food' },
+            environment: { good: '♻️', bad: '🏭', goodLabel: 'Recycle', badLabel: 'Pollution' },
+            cyber: { good: '🔒', bad: '🤖', goodLabel: 'Security', badLabel: 'Virus Bot' },
+            cricket: { good: '🏏', bad: '🔴', goodLabel: 'Bat', badLabel: 'Out' },
+            treasure: { good: '💎', bad: '💣', goodLabel: 'Gem', badLabel: 'Bomb' },
+            crime: { good: '👮', bad: '🦹', goodLabel: 'Police', badLabel: 'Criminal' }
+        };
+
+        // Difficulty configurations
+        const difficulties = {
+            easy: { hoverTime: 1200, spawnRate: 900 },
+            medium: { hoverTime: 900, spawnRate: 700 },
+            hard: { hoverTime: 750, spawnRate: 500 }
+        };
+
         let gameState = gameStates.IDLE;
         let score = 0;
-        let timeLeft = 30;
+        let timeLeft = 45;
         let gameInterval;
         let spawnInterval;
         let currentSpawnRate = 800;
         let scoreTimeout;
         let gameStartTime;
+        let selectedTheme = null;
+        let selectedDifficulty = 'medium';
+        let moleHoverTime = 900;
 
         const scoreElement = document.getElementById('scoreValue');
         const timerElement = document.getElementById('timerValue');
         const startScreen = document.getElementById('startScreen');
         const startButton = document.getElementById('startButton');
+        const themeSelection = document.getElementById('themeSelection');
+        const proceedButton = document.getElementById('proceedButton');
         const tryAgainButton = document.getElementById('tryAgainButton');
         const gameOver = document.getElementById('gameOver');
         const finalScoreElement = document.getElementById('finalScore');
@@ -743,9 +1008,9 @@
         // Motivational messages
         const celebrationMessages = [
             "🎉 Incredible! You've crushed your previous record! You're on fire!",
-            "🚀 Amazing improvement! Your bug-squashing skills are getting sharper!",
-            "⭐ Fantastic! You're climbing the ranks like a coding champion!",
-            "💪 Outstanding! That's the spirit of a true developer!",
+            "🚀 Amazing improvement! Your skills are getting sharper!",
+            "⭐ Fantastic! You're climbing the ranks like a champion!",
+            "💪 Outstanding! That's the spirit of a true winner!",
             "🏆 Phenomenal! You're mastering this game like a pro!",
             "✨ Brilliant! Your reflexes are getting faster and faster!",
             "🎯 Superb! You're setting new standards of excellence!",
@@ -753,7 +1018,7 @@
         ];
 
         const encouragementMessages = [
-            "💙 Don't worry! Every great developer faces setbacks. Try again!",
+            "💙 Don't worry! Every champion faces setbacks. You'll do better next time!",
             "🌟 You're getting better with each try! Keep practicing!",
             "💪 Close one! You've got this - give it another shot!",
             "🎯 Almost there! Your next attempt could be your best yet!",
@@ -771,6 +1036,27 @@
             "✨ Great beginning! Your journey to mastery starts now!",
             "🎯 Solid first score! Time to set a new record!"
         ];
+
+        // Theme selection
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedTheme = option.dataset.theme;
+                proceedButton.disabled = false;
+            });
+        });
+
+        // Difficulty selection
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedDifficulty = btn.dataset.difficulty;
+                moleHoverTime = difficulties[selectedDifficulty].hoverTime;
+                currentSpawnRate = difficulties[selectedDifficulty].spawnRate;
+            });
+        });
 
         // Load score history from localStorage
         function loadScoreHistory() {
@@ -828,26 +1114,39 @@
         // Initialize
         displayScoreHistory();
 
-        startButton.addEventListener('click', startGame);
+        startButton.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            themeSelection.style.display = 'flex';
+        });
+
+        proceedButton.addEventListener('click', () => {
+            if (selectedTheme) {
+                themeSelection.style.display = 'none';
+                startGame();
+            }
+        });
+
         tryAgainButton.addEventListener('click', () => {
             gameOver.style.display = 'none';
             document.body.className = 'state-idle';
-            startScreen.style.display = 'flex';
+            themeSelection.style.display = 'flex';
         });
 
         function startGame() {
             gameState = gameStates.RUNNING;
             score = 0;
-            timeLeft = 30;
-            currentSpawnRate = 800;
+            timeLeft = 45;
             gameStartTime = Date.now();
             
             // Change background to playing state
             document.body.className = 'state-playing';
             
+            // Set spawn rate based on difficulty
+            currentSpawnRate = difficulties[selectedDifficulty].spawnRate;
+            moleHoverTime = difficulties[selectedDifficulty].hoverTime;
+            
             updateScore();
             updateTimer();
-            startScreen.style.display = 'none';
             gameOver.style.display = 'none';
 
             // Clear any existing moles
@@ -861,13 +1160,13 @@
                 timeLeft--;
                 updateTimer();
                 
-                // Progressive difficulty
-                const elapsedTime = 30 - timeLeft;
-                if (elapsedTime === 10 && currentSpawnRate === 800) {
-                    currentSpawnRate = 700;
+                // Progressive difficulty (optional speed boost)
+                const elapsedTime = 45 - timeLeft;
+                if (elapsedTime === 15 && selectedDifficulty !== 'hard') {
+                    currentSpawnRate = Math.max(currentSpawnRate - 100, 400);
                     restartSpawning();
-                } else if (elapsedTime === 20 && currentSpawnRate === 700) {
-                    currentSpawnRate = 500;
+                } else if (elapsedTime === 30 && selectedDifficulty !== 'hard') {
+                    currentSpawnRate = Math.max(currentSpawnRate - 150, 300);
                     restartSpawning();
                 }
                 
@@ -982,14 +1281,18 @@
             // Select random hole
             const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
             
-            // Determine mole type (50% bug, 50% best practice)
-            const isBug = Math.random() > 0.5;
+            // Determine mole type (50% good, 50% bad)
+            const isGood = Math.random() > 0.5;
+            
+            // Get theme icons
+            const themeConfig = themes[selectedTheme];
+            const icon = isGood ? themeConfig.good : themeConfig.bad;
             
             // Create mole
             const mole = document.createElement('div');
             mole.className = 'mole';
-            mole.textContent = isBug ? '🐛' : '✨';
-            mole.dataset.type = isBug ? 'bug' : 'practice';
+            mole.textContent = icon;
+            mole.dataset.type = isGood ? 'good' : 'bad';
             
             randomHole.appendChild(mole);
             
@@ -1001,13 +1304,13 @@
             // Add click handler
             mole.addEventListener('click', () => handleMoleClick(mole, randomHole));
             
-            // Auto-hide after 2 seconds
+            // Auto-hide after hover time based on difficulty
             setTimeout(() => {
                 if (mole.parentNode && gameState === gameStates.RUNNING) {
                     mole.classList.remove('active');
                     setTimeout(() => mole.remove(), 300);
                 }
-            }, 2000);
+            }, moleHoverTime);
         }
 
         function handleMoleClick(mole, hole) {
@@ -1015,8 +1318,8 @@
             
             mole.classList.add('clicked');
             
-            const isBug = mole.dataset.type === 'bug';
-            const points = isBug ? 10 : -5;
+            const isGood = mole.dataset.type === 'good';
+            const points = isGood ? -5 : 10;
             
             score += points;
             updateScore();
@@ -1025,7 +1328,7 @@
             showFloatingScore(points, hole);
             
             // Visual feedback
-            if (isBug) {
+            if (points > 0) {
                 flashScore('correct');
             } else {
                 flashScore('incorrect');
