@@ -1,0 +1,83 @@
+---
+inclusion: always
+---
+
+# Project Structure
+
+The project should follow a simple and clear structure suitable for a small browser-based application.
+
+## Directory Layout
+
+```
+.
+├── .git/                 # Git version control
+├── .kiro/                # Kiro AI assistant configuration
+│   └── steering/         # AI guidance documents
+├── src/                  # Application source files
+│   ├── index.html        # Main HTML entry point
+│   ├── styles.css        # Game styling and layout
+│   └── game.js           # Core game logic
+├── specs/                # Spec-driven development artifacts
+│   └── game/             # Feature specification and tasks
+│       ├── spec.md
+│       └── tasks.md
+└── README.md             # Project documentation
+```
+
+## Conventions
+
+### File Organization
+
+- `index.html` contains the UI structure and game container elements.
+- `styles.css` defines layout and visual styling.
+- `game.js` contains all core gameplay logic.
+- `specs/` stores spec-driven development documents such as feature specifications and task lists.
+- `.kiro/steering/` provides rules and context that guide the AI assistant when generating code.
+
+
+### Naming Conventions
+
+- Use **camelCase** for JavaScript functions and variables.
+- Use **kebab-case** for CSS classes.
+- Use descriptive function names such as:
+  - `startGame`
+  - `endGame`
+  - `spawnEvent`
+  - `updateScore`
+  - `resetGame`
+
+### Module Structure
+
+The project uses a simple modular structure within `game.js`:
+
+- Game State Management
+- Event Generation Logic
+- Score Handling
+- Timer Logic
+- UI Rendering / DOM Updates
+
+Functions should remain small and focused.
+
+Avoid large monolithic functions.
+
+## Architecture Patterns
+
+The application follows a simple **state-driven architecture**.
+
+The game operates with three main states:
+idle → running → ended
+
+A single state object manages the core game data:
+```
+state = {
+score: 0,
+timeLeft: 30,
+status: "idle"
+}
+```
+
+Key patterns used:
+- State-driven UI updates
+- Event-based user interactions
+- Separation between game logic and DOM manipulation
+- Small modular functions for each behavior
