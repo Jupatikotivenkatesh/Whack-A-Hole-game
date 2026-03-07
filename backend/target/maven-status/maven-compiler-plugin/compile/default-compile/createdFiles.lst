@@ -1,0 +1,6 @@
+com\whackamole\entity\Score.class
+com\whackamole\controller\ScoreController.class
+com\whackamole\repository\ScoreRepository.class
+com\whackamole\controller\HealthController.class
+com\whackamole\dto\ScoreRequest.class
+com\whackamole\WhackAMoleApplication.class
