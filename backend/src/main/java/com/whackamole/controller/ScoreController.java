@@ -6,6 +6,7 @@ import com.whackamole.repository.ScoreRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,13 +15,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin("*")
 public class ScoreController {
     
     @Autowired
     private ScoreRepository scoreRepository;
     
-    @PostMapping("/scores")
+    @PostMapping(value = "/scores", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Score> saveScore(@Valid @RequestBody ScoreRequest request) {
         Score score = new Score();
         score.setPlayerName(request.getPlayerName());
