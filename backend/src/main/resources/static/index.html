@@ -412,6 +412,15 @@
     </div>
 
     <script>
+        // ============================================================================
+        // BASE URL CONFIGURATION - CLOUD READY
+        // ============================================================================
+        // Automatically detects localhost or production environment
+        // For local: http://localhost:8080
+        // For production: https://your-app.onrender.com
+        const BASE_URL = window.location.origin;
+        console.log('Backend API URL:', BASE_URL);
+
         // Game State
         let selectedTheme = null;
         let selectedDifficulty = null;
@@ -608,7 +617,7 @@
             console.log('Saving score:', { playerName, score, selectedTheme, selectedDifficulty });
             
             try {
-                const response = await fetch('/api/scores', {
+                const response = await fetch(`${BASE_URL}/api/scores`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -641,7 +650,7 @@
             console.log('Loading leaderboard...');
             
             try {
-                const response = await fetch('/api/leaderboard');
+                const response = await fetch(`${BASE_URL}/api/leaderboard`);
                 
                 if (response.ok) {
                     const scores = await response.json();
