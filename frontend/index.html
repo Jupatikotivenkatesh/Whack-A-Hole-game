@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Splash Screen -->
+        <div class="screen active" id="splashScreen">
+            <div class="splash-screen">
+                <h1>🎯 WHACK-A-MOLE</h1>
+                <p>Test your reflexes!</p>
+                <button class="btn" onclick="showThemeSelection()">CHOOSE THEME</button>
+            </div>
+        </div>
+
+        <!-- Theme Selection Screen -->
+        <div class="screen" id="themeScreen">
+            <div class="theme-selection">
+                <h2>Choose Your Theme</h2>
+                <div class="theme-grid">
+                    <div class="theme-card" onclick="selectTheme('classic')">
+                        <h3>🎮 Classic</h3>
+                        <p>Traditional mole whacking</p>
+                    </div>
+                    <div class="theme-card" onclick="selectTheme('forest')">
+                        <h3>🌲 Forest</h3>
+                        <p>Woodland creatures</p>
+                    </div>
+                    <div class="theme-card" onclick="selectTheme('space')">
+                        <h3>🚀 Space</h3>
+                        <p>Alien invasion</p>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="showSplash()">Back</button>
+                    <button class="btn" id="themeNextBtn" onclick="showDifficultySelection()" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Difficulty Selection Screen -->
+        <div class="screen" id="difficultyScreen">
+            <div class="difficulty-selection">
+                <h2>Choose Difficulty</h2>
+                <div class="difficulty-grid">
+                    <div class="difficulty-card" onclick="selectDifficulty('easy')">
+                        <h3>🟢 Easy</h3>
+                        <p>Slow pace - 2s per mole</p>
+                    </div>
+                    <div class="difficulty-card" onclick="selectDifficulty('medium')">
+                        <h3>🟡 Medium</h3>
+                        <p>Normal pace - 1.5s per mole</p>
+                    </div>
+                    <div class="difficulty-card" onclick="selectDifficulty('hard')">
+                        <h3>🔴 Hard</h3>
+                        <p>Fast pace - 1s per mole</p>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="showThemeSelection()">Back</button>
+                    <button class="btn" id="difficultyNextBtn" onclick="startGame()" disabled>Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen" id="gameScreen">
+            <div class="game-screen">
+                <div class="game-header">
+                    <div class="score-display">
+                        Score: <span id="score">0</span>
+                    </div>
+                    <div class="timer-display">
+                        Time: <span id="timer">30</span>s
+                    </div>
+                </div>
+                <div class="game-board" id="gameBoard">
+                    <div class="hole" onclick="whackMole(0)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(1)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(2)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(3)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(4)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(5)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(6)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(7)"><span class="mole">🐹</span></div>
+                    <div class="hole" onclick="whackMole(8)"><span class="mole">🐹</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="screen" id="gameOverScreen">
+            <div class="game-over-screen">
+                <h2>🎉 Game Over!</h2>
+                <div class="final-score" id="finalScore">0</div>
+                <p>Enter your name for the leaderboard:</p>
+                <input type="text" class="name-input" id="playerName" placeholder="Your Name" maxlength="20">
+                <div class="button-group">
+                    <button class="btn" onclick="saveScore()">Save Score</button>
+                    <button class="btn" onclick="playAgain()">Play Again</button>
+                </div>
+                <div class="leaderboard" id="leaderboard">
+                    <h3>🏆 Leaderboard</h3>
+                    <div id="leaderboardList">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

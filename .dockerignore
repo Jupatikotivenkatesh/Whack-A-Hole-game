@@ -1,0 +1,37 @@
+# Maven build artifacts
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed in container)
+*.md
+*.html
+*.mp4
+
+# Scripts
+*.bat
+*.sh
+
+# Other
+.kiro/
+node_modules/
