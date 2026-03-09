@@ -160,24 +160,17 @@ function createGameBoard() {
 }
 
 function spawnTarget() {
-    // Clear previous targets
-    currentTargets.forEach(target => {
-        const hole = document.querySelector(`[data-index="${target.index}"]`);
-        if (hole) {
-            const emojiSpan = hole.querySelector('.hole-emoji');
-            if (emojiSpan) emojiSpan.textContent = '';
-            hole.classList.remove('active-correct', 'active-wrong');
-        }
-    });
-    currentTargets = [];
+    // Don't clear targets that are still active - let them timeout naturally
+    // Only spawn new targets in empty holes
     
     // Spawn 1-2 targets
     const numTargets = Math.random() < 0.7 ? 1 : 2;
-    const availableHoles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
     
-    for (let i = 0; i < numTargets; i++) {
-        if (availableHoles.length === 0) break;
-        
+    // Get holes that don't have active targets
+    const occupiedHoles = currentTargets.map(t => t.index);
+    const availableHoles = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(i => !occupiedHoles.includes(i));
+    
+    for (let i = 0; i < numTargets && availableHoles.length > 0; i++) {
         const randomIndex = Math.floor(Math.random() * availableHoles.length);
         const holeIndex = availableHoles.splice(randomIndex, 1)[0];
         
@@ -188,7 +181,8 @@ function spawnTarget() {
         const target = {
             index: holeIndex,
             isCorrect: isCorrect,
-            emoji: isCorrect ? theme.correct : theme.wrong
+            emoji: isCorrect ? theme.correct : theme.wrong,
+            timeoutId: null
         };
         
         currentTargets.push(target);
@@ -197,30 +191,38 @@ function spawnTarget() {
         const emojiSpan = hole.querySelector('.hole-emoji');
         if (emojiSpan) emojiSpan.textContent = target.emoji;
         hole.classList.add(isCorrect ? 'active-correct' : 'active-wrong');
-    }
-    
-    // Auto-hide targets after time
-    const settings = DIFFICULTY_SETTINGS[selectedDifficulty];
-    setTimeout(() => {
-        currentTargets.forEach(target => {
-            const hole = document.querySelector(`[data-index="${target.index}"]`);
-            if (hole) {
-                const emojiSpan = hole.querySelector('.hole-emoji');
-                if (emojiSpan) emojiSpan.textContent = '';
-                hole.classList.remove('active-correct', 'active-wrong');
+        
+        // Set individual timeout for this target
+        const settings = DIFFICULTY_SETTINGS[selectedDifficulty];
+        target.timeoutId = setTimeout(() => {
+            // Only remove if target still exists (wasn't hit)
+            const targetIndex = currentTargets.findIndex(t => t.index === holeIndex);
+            if (targetIndex !== -1) {
+                const hole = document.querySelector(`[data-index="${holeIndex}"]`);
+                if (hole) {
+                    const emojiSpan = hole.querySelector('.hole-emoji');
+                    if (emojiSpan) emojiSpan.textContent = '';
+                    hole.classList.remove('active-correct', 'active-wrong');
+                }
+                currentTargets.splice(targetIndex, 1);
             }
-        });
-        currentTargets = [];
-    }, settings.targetTime);
+        }, settings.targetTime);
+    }
 }
 
 function hitTarget(holeIndex) {
-    const target = currentTargets.find(t => t.index === holeIndex);
+    const targetIndex = currentTargets.findIndex(t => t.index === holeIndex);
     
-    if (!target) return; // No target at this hole
+    if (targetIndex === -1) return; // No target at this hole
     
+    const target = currentTargets[targetIndex];
     const hole = document.querySelector(`[data-index="${holeIndex}"]`);
     const emojiSpan = hole.querySelector('.hole-emoji');
+    
+    // Clear the timeout for this target
+    if (target.timeoutId) {
+        clearTimeout(target.timeoutId);
+    }
     
     if (target.isCorrect) {
         // Correct hit: +10 points
@@ -240,7 +242,7 @@ function hitTarget(holeIndex) {
     // Remove target immediately when hit
     if (emojiSpan) emojiSpan.textContent = '';
     hole.classList.remove('active-correct', 'active-wrong');
-    currentTargets = currentTargets.filter(t => t.index !== holeIndex);
+    currentTargets.splice(targetIndex, 1);
     
     // Remove hit animation after delay
     setTimeout(() => {
