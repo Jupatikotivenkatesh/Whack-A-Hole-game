@@ -188,9 +188,9 @@ Response: [
 ## 🎨 Game Mechanics
 
 ### Difficulty Levels
-- **Easy**: 2s target display, 1.5s spawn rate
-- **Medium**: 1.5s target display, 1s spawn rate
-- **Hard**: 1s target display, 0.7s spawn rate
+- **Easy**: 3s target display, 2.5s spawn rate
+- **Medium**: 2.5s target display, 2s spawn rate
+- **Hard**: 2s target display, 1.5s spawn rate
 
 ### Target System
 - 70% chance of correct target

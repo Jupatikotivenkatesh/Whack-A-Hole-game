@@ -7,150 +7,212 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Fireworks Container for Celebrations -->
+    <!-- Fireworks Container -->
     <div class="fireworks-container" id="fireworksContainer"></div>
     
-    <div class="game-container">
-        <!-- Left Panel - Game Area -->
-        <div class="left-panel">
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Game Container (Full Width Initially) -->
+        <div class="game-container">
             <!-- Splash Screen -->
             <div class="screen active" id="splashScreen">
-                <div class="splash-screen">
-                    <h1 class="game-title">🎯 WHACK-A-MOLE</h1>
-                    <p class="subtitle">Enhanced Edition</p>
-                    <button class="btn btn-primary" onclick="showThemeSelection()">START GAME</button>
+                <div class="splash-content">
+                    <div class="game-logo">
+                        <div class="logo-icon">🎯</div>
+                        <h1>WHACK-A-MOLE</h1>
+                        <p class="tagline">Enhanced Edition</p>
+                    </div>
+                    <button class="btn btn-start" onclick="showThemeSelection()">
+                        <span>START GAME</span>
+                        <span class="btn-icon">▶</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Theme Selection Screen -->
             <div class="screen" id="themeScreen">
-                <h2 class="screen-title">Choose Your Theme</h2>
+                <div class="screen-header">
+                    <h2>Choose Your Theme</h2>
+                    <p class="screen-subtitle">Select your favorite game theme</p>
+                </div>
+                
                 <div class="theme-grid">
-                    <div class="theme-card" onclick="selectTheme('classic')">
+                    <div class="theme-card" onclick="selectTheme('classic', this)">
                         <div class="theme-icon">🐹</div>
                         <h3>Classic</h3>
                         <p>Traditional mole whacking</p>
+                        <div class="theme-badge">Original</div>
                     </div>
-                    <div class="theme-card" onclick="selectTheme('forest')">
+                    <div class="theme-card" onclick="selectTheme('forest', this)">
                         <div class="theme-icon">🦝</div>
                         <h3>Forest</h3>
                         <p>Woodland creatures</p>
+                        <div class="theme-badge">Nature</div>
                     </div>
-                    <div class="theme-card" onclick="selectTheme('space')">
+                    <div class="theme-card" onclick="selectTheme('space', this)">
                         <div class="theme-icon">👽</div>
                         <h3>Space</h3>
                         <p>Alien invasion</p>
+                        <div class="theme-badge">Sci-Fi</div>
                     </div>
-                    <div class="theme-card" onclick="selectTheme('ocean')">
+                    <div class="theme-card" onclick="selectTheme('ocean', this)">
                         <div class="theme-icon">🐙</div>
                         <h3>Ocean</h3>
                         <p>Deep sea adventure</p>
+                        <div class="theme-badge">New</div>
                     </div>
-                    <div class="theme-card" onclick="selectTheme('candy')">
+                    <div class="theme-card" onclick="selectTheme('candy', this)">
                         <div class="theme-icon">🍭</div>
                         <h3>Candy</h3>
                         <p>Sweet treats</p>
+                        <div class="theme-badge">Sweet</div>
                     </div>
                 </div>
+                
                 <div class="button-group">
-                    <button class="btn btn-secondary" onclick="showSplash()">Back</button>
-                    <button class="btn btn-primary" id="themeNextBtn" onclick="showDifficultySelection()" disabled>Next</button>
+                    <button class="btn btn-secondary" onclick="showSplash()">
+                        <span>← Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="themeNextBtn" onclick="showDifficultySelection()" disabled>
+                        <span>Next →</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Difficulty Selection Screen with Scoring Rules -->
+            <!-- Difficulty Selection Screen -->
             <div class="screen" id="difficultyScreen">
-                <h2 class="screen-title">Choose Difficulty</h2>
+                <div class="screen-header">
+                    <h2>Choose Difficulty</h2>
+                    <p class="screen-subtitle">Select your challenge level</p>
+                </div>
                 
-                <!-- Scoring Rules Box -->
-                <div class="scoring-rules">
-                    <h3>📊 Scoring Rules</h3>
-                    <div class="rule-item">
-                        <span class="rule-icon">✅</span>
-                        <span>Hit correct target: <strong>+10 points</strong></span>
-                    </div>
-                    <div class="rule-item">
-                        <span class="rule-icon">❌</span>
-                        <span>Hit wrong target: <strong>-10 points</strong></span>
-                    </div>
-                    <div class="rule-item">
-                        <span class="rule-icon">⏱️</span>
-                        <span>Game duration: <strong>45 seconds</strong></span>
+                <!-- Scoring Rules -->
+                <div class="rules-box">
+                    <h3>📊 Game Rules</h3>
+                    <div class="rules-grid">
+                        <div class="rule-item">
+                            <div class="rule-icon correct">✓</div>
+                            <div class="rule-text">
+                                <strong>Hit Correct Target</strong>
+                                <span>+10 Points</span>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-icon wrong">✗</div>
+                            <div class="rule-text">
+                                <strong>Hit Wrong Target</strong>
+                                <span>-10 Points</span>
+                            </div>
+                        </div>
+                        <div class="rule-item">
+                            <div class="rule-icon time">⏱</div>
+                            <div class="rule-text">
+                                <strong>Game Duration</strong>
+                                <span>45 Seconds</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="difficulty-grid">
-                    <div class="difficulty-card" onclick="selectDifficulty('easy')">
-                        <h3>🟢 Easy</h3>
-                        <p>Slow pace - 2s per target</p>
-                        <span class="difficulty-badge">Beginner</span>
+                    <div class="difficulty-card easy" onclick="selectDifficulty('easy', this)">
+                        <div class="difficulty-icon">🟢</div>
+                        <h3>Easy</h3>
+                        <p>Relaxed pace</p>
+                        <div class="difficulty-stats">
+                            <span>3s per target</span>
+                        </div>
                     </div>
-                    <div class="difficulty-card" onclick="selectDifficulty('medium')">
-                        <h3>🟡 Medium</h3>
-                        <p>Normal pace - 1.5s per target</p>
-                        <span class="difficulty-badge">Intermediate</span>
+                    <div class="difficulty-card medium" onclick="selectDifficulty('medium', this)">
+                        <div class="difficulty-icon">🟡</div>
+                        <h3>Medium</h3>
+                        <p>Balanced challenge</p>
+                        <div class="difficulty-stats">
+                            <span>2.5s per target</span>
+                        </div>
                     </div>
-                    <div class="difficulty-card" onclick="selectDifficulty('hard')">
-                        <h3>🔴 Hard</h3>
-                        <p>Fast pace - 1s per target</p>
-                        <span class="difficulty-badge">Expert</span>
+                    <div class="difficulty-card hard" onclick="selectDifficulty('hard', this)">
+                        <div class="difficulty-icon">🔴</div>
+                        <h3>Hard</h3>
+                        <p>Expert mode</p>
+                        <div class="difficulty-stats">
+                            <span>2s per target</span>
+                        </div>
                     </div>
                 </div>
+                
                 <div class="button-group">
-                    <button class="btn btn-secondary" onclick="showThemeSelection()">Back</button>
-                    <button class="btn btn-primary" id="difficultyNextBtn" onclick="startGame()" disabled>Start Game</button>
+                    <button class="btn btn-secondary" onclick="showThemeSelection()">
+                        <span>← Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="difficultyNextBtn" onclick="startGame()" disabled>
+                        <span>Start Game 🎮</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Game Screen -->
             <div class="screen" id="gameScreen">
                 <div class="game-header">
-                    <div class="score-display">
-                        <span class="label">Score</span>
-                        <span class="value" id="score">0</span>
+                    <div class="stat-card score-card">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
                     </div>
-                    <div class="timer-display">
-                        <span class="label">Time</span>
-                        <span class="value" id="timer">45</span>s
+                    <div class="stat-card timer-card">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value"><span id="timer">45</span>s</div>
                     </div>
                 </div>
-                <div class="game-board" id="gameBoard">
-                    <!-- Holes will be generated dynamically -->
-                </div>
-                <div class="game-info">
-                    <p>Hit the correct targets to gain points!</p>
-                    <p class="warning">Avoid wrong targets - they cost points!</p>
+                
+                <div class="game-board" id="gameBoard"></div>
+                
+                <div class="game-hint">
+                    <p>🎯 Hit the <strong>correct</strong> targets to gain points!</p>
+                    <p>⚠️ Avoid <strong>wrong</strong> targets - they cost points!</p>
                 </div>
             </div>
 
             <!-- Game Over Screen -->
             <div class="screen" id="gameOverScreen">
                 <div class="game-over-content">
-                    <h2 class="game-over-title">Game Over!</h2>
-                    <div class="final-score-display">
-                        <span class="final-score-label">Your Score</span>
-                        <span class="final-score-value" id="finalScore">0</span>
+                    <h2 class="game-over-title">🎮 Game Over!</h2>
+                    
+                    <div class="final-score-card">
+                        <div class="score-label">Your Score</div>
+                        <div class="score-value" id="finalScore">0</div>
                     </div>
+                    
                     <div class="score-message" id="scoreMessage"></div>
-                    <input type="text" class="name-input" id="playerName" placeholder="Enter your name" maxlength="20">
+                    
+                    <div class="name-input-group">
+                        <input type="text" class="name-input" id="playerName" 
+                               placeholder="Enter your name" maxlength="20">
+                    </div>
+                    
                     <div class="button-group">
-                        <button class="btn btn-primary" onclick="saveScore()">Save Score</button>
-                        <button class="btn btn-secondary" onclick="playAgain()">Play Again</button>
+                        <button class="btn btn-primary" onclick="saveScore()">
+                            <span>💾 Save Score</span>
+                        </button>
+                        <button class="btn btn-secondary" onclick="playAgain()">
+                            <span>🔄 Play Again</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Panel - Live Leaderboard -->
-        <div class="right-panel">
-            <div class="leaderboard-panel">
-                <h2 class="leaderboard-title">🏆 Leaderboard</h2>
-                <div class="leaderboard-subtitle">Top Players</div>
-                <div class="leaderboard-list" id="leaderboardList">
-                    <div class="loading">Loading...</div>
-                </div>
-                <button class="btn btn-refresh" onclick="loadLeaderboard()">🔄 Refresh</button>
+        <!-- Leaderboard Panel (Hidden Initially) -->
+        <div class="leaderboard-panel" id="leaderboardPanel">
+            <div class="leaderboard-header">
+                <h2>🏆 Leaderboard</h2>
+                <p>Top Players</p>
             </div>
+            <div class="leaderboard-content" id="leaderboardList">
+                <div class="loading">Loading...</div>
+            </div>
+            <button class="btn-refresh" onclick="loadLeaderboard()">
+                <span>🔄 Refresh</span>
+            </button>
         </div>
     </div>
 

@@ -30,11 +30,11 @@ const THEMES = {
     }
 };
 
-// Difficulty Settings
+// Difficulty Settings - Slower pace for better gameplay
 const DIFFICULTY_SETTINGS = {
-    easy: { targetTime: 2000, spawnRate: 1500 },
-    medium: { targetTime: 1500, spawnRate: 1000 },
-    hard: { targetTime: 1000, spawnRate: 700 }
+    easy: { targetTime: 3000, spawnRate: 2500 },
+    medium: { targetTime: 2500, spawnRate: 2000 },
+    hard: { targetTime: 2000, spawnRate: 1500 }
 };
 
 // Game State
@@ -49,9 +49,7 @@ let playerPreviousBest = 0;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    loadLeaderboard();
-    // Refresh leaderboard every 10 seconds
-    setInterval(loadLeaderboard, 10000);
+    // Don't load leaderboard on startup - only during game
 });
 
 // Screen Navigation
@@ -79,22 +77,22 @@ function showDifficultySelection() {
 }
 
 // Theme Selection
-function selectTheme(theme) {
+function selectTheme(theme, element) {
     selectedTheme = theme;
     document.querySelectorAll('.theme-card').forEach(card => {
         card.classList.remove('selected');
     });
-    event.target.closest('.theme-card').classList.add('selected');
+    element.classList.add('selected');
     document.getElementById('themeNextBtn').disabled = false;
 }
 
 // Difficulty Selection
-function selectDifficulty(difficulty) {
+function selectDifficulty(difficulty, element) {
     selectedDifficulty = difficulty;
     document.querySelectorAll('.difficulty-card').forEach(card => {
         card.classList.remove('selected');
     });
-    event.target.closest('.difficulty-card').classList.add('selected');
+    element.classList.add('selected');
     document.getElementById('difficultyNextBtn').disabled = false;
 }
 
@@ -117,8 +115,13 @@ function startGame() {
     // Create game board
     createGameBoard();
     
-    // Show game screen
+    // Show game screen and leaderboard
     showScreen('gameScreen');
+    document.getElementById('leaderboardPanel').classList.add('visible');
+    
+    // Load and start refreshing leaderboard
+    loadLeaderboard();
+    const leaderboardRefresh = setInterval(loadLeaderboard, 10000);
     
     // Start game timer
     gameInterval = setInterval(() => {
@@ -126,6 +129,7 @@ function startGame() {
         document.getElementById('timer').textContent = timeLeft;
         
         if (timeLeft <= 0) {
+            clearInterval(leaderboardRefresh);
             endGame();
         }
     }, 1000);
@@ -145,6 +149,12 @@ function createGameBoard() {
         hole.className = 'hole';
         hole.dataset.index = i;
         hole.onclick = () => hitTarget(i);
+        
+        // Create emoji container
+        const emojiSpan = document.createElement('span');
+        emojiSpan.className = 'hole-emoji';
+        hole.appendChild(emojiSpan);
+        
         gameBoard.appendChild(hole);
     }
 }
@@ -154,7 +164,8 @@ function spawnTarget() {
     currentTargets.forEach(target => {
         const hole = document.querySelector(`[data-index="${target.index}"]`);
         if (hole) {
-            hole.textContent = '';
+            const emojiSpan = hole.querySelector('.hole-emoji');
+            if (emojiSpan) emojiSpan.textContent = '';
             hole.classList.remove('active-correct', 'active-wrong');
         }
     });
@@ -183,7 +194,8 @@ function spawnTarget() {
         currentTargets.push(target);
         
         const hole = document.querySelector(`[data-index="${holeIndex}"]`);
-        hole.textContent = target.emoji;
+        const emojiSpan = hole.querySelector('.hole-emoji');
+        if (emojiSpan) emojiSpan.textContent = target.emoji;
         hole.classList.add(isCorrect ? 'active-correct' : 'active-wrong');
     }
     
@@ -193,7 +205,8 @@ function spawnTarget() {
         currentTargets.forEach(target => {
             const hole = document.querySelector(`[data-index="${target.index}"]`);
             if (hole) {
-                hole.textContent = '';
+                const emojiSpan = hole.querySelector('.hole-emoji');
+                if (emojiSpan) emojiSpan.textContent = '';
                 hole.classList.remove('active-correct', 'active-wrong');
             }
         });
@@ -207,6 +220,7 @@ function hitTarget(holeIndex) {
     if (!target) return; // No target at this hole
     
     const hole = document.querySelector(`[data-index="${holeIndex}"]`);
+    const emojiSpan = hole.querySelector('.hole-emoji');
     
     if (target.isCorrect) {
         // Correct hit: +10 points
@@ -223,8 +237,8 @@ function hitTarget(holeIndex) {
     // Update score display
     document.getElementById('score').textContent = score;
     
-    // Remove target
-    hole.textContent = '';
+    // Remove target immediately when hit
+    if (emojiSpan) emojiSpan.textContent = '';
     hole.classList.remove('active-correct', 'active-wrong');
     currentTargets = currentTargets.filter(t => t.index !== holeIndex);
     
@@ -237,6 +251,7 @@ function hitTarget(holeIndex) {
 function showScorePopup(holeIndex, text, color) {
     const hole = document.querySelector(`[data-index="${holeIndex}"]`);
     const popup = document.createElement('div');
+    popup.className = 'score-popup';
     popup.textContent = text;
     popup.style.cssText = `
         position: absolute;
@@ -247,24 +262,16 @@ function showScorePopup(holeIndex, text, color) {
         font-weight: bold;
         color: ${color};
         pointer-events: none;
+        z-index: 100;
         animation: scorePopup 1s ease forwards;
     `;
     
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes scorePopup {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    hole.style.position = 'relative';
     hole.appendChild(popup);
     
     setTimeout(() => {
-        popup.remove();
-        style.remove();
+        if (popup.parentNode) {
+            popup.remove();
+        }
     }, 1000);
 }
 
@@ -277,7 +284,8 @@ function endGame() {
     currentTargets.forEach(target => {
         const hole = document.querySelector(`[data-index="${target.index}"]`);
         if (hole) {
-            hole.textContent = '';
+            const emojiSpan = hole.querySelector('.hole-emoji');
+            if (emojiSpan) emojiSpan.textContent = '';
             hole.classList.remove('active-correct', 'active-wrong');
         }
     });
@@ -337,7 +345,6 @@ async function saveScore() {
 
 // Fireworks Animation
 function triggerFireworks() {
-    const container = document.getElementById('fireworksContainer');
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     
     for (let i = 0; i < 50; i++) {
@@ -424,5 +431,6 @@ function playAgain() {
     selectedDifficulty = null;
     document.getElementById('playerName').value = '';
     document.getElementById('scoreMessage').textContent = '';
+    document.getElementById('leaderboardPanel').classList.remove('visible');
     showSplash();
 }
