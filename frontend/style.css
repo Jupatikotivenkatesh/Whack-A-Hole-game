@@ -14,6 +14,8 @@ body {
     position: relative;
     overflow-x: hidden;
     color: #fff;
+    padding: 10px;
+    margin: 0;
 }
 
 /* Fireworks Container */
@@ -44,9 +46,9 @@ body {
 .main-container {
     display: flex;
     gap: 0;
-    max-width: 1400px;
+    max-width: 100%;
     width: 100%;
-    padding: 20px;
+    padding: 10px;
     transition: all 0.5s ease;
 }
 
@@ -54,12 +56,13 @@ body {
 .game-container {
     flex: 1;
     background: transparent;
-    border-radius: 30px;
-    padding: 30px;
-    min-height: 600px;
+    border-radius: 20px;
+    padding: 20px;
+    min-height: auto;
     transition: all 0.5s ease;
-    max-width: 950px;
+    max-width: 900px;
     margin: 0 auto;
+    width: 100%;
 }
 
 /* Leaderboard Panel - Hidden Initially */
@@ -101,16 +104,16 @@ body {
 /* Splash Screen */
 .splash-content {
     text-align: center;
-    padding: 50px 20px;
+    padding: 30px 15px;
 }
 
 .game-logo {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .logo-icon {
-    font-size: 5rem;
-    margin-bottom: 12px;
+    font-size: 4rem;
+    margin-bottom: 10px;
     animation: bounce 2s ease-in-out infinite;
 }
 
@@ -120,7 +123,7 @@ body {
 }
 
 .game-logo h1 {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 900;
     color: #00ffcc;
     text-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
@@ -129,15 +132,15 @@ body {
 }
 
 .tagline {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #a0aec0;
     font-weight: 300;
 }
 
 /* Buttons */
 .btn {
-    padding: 15px 40px;
-    font-size: 1.1rem;
+    padding: 12px 30px;
+    font-size: 1rem;
     font-weight: 600;
     border: none;
     border-radius: 50px;
@@ -145,7 +148,7 @@ body {
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -154,8 +157,8 @@ body {
 .btn-start {
     background: #00ffcc;
     color: #1a1f3a;
-    font-size: 1.2rem;
-    padding: 18px 45px;
+    font-size: 1.1rem;
+    padding: 15px 40px;
     box-shadow: 0 10px 30px rgba(0, 255, 204, 0.4);
     font-weight: 700;
 }
@@ -197,25 +200,25 @@ body {
 }
 
 .btn-icon {
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 /* Screen Header */
 .screen-header {
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .screen-header h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     color: #00ffcc;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     font-weight: 700;
     text-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
 }
 
 .screen-subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #a0aec0;
     font-weight: 300;
 }
@@ -223,10 +226,10 @@ body {
 /* Theme Grid */
 .theme-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    margin-bottom: 30px;
-    max-width: 850px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 25px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -239,7 +242,7 @@ body {
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-height: 140px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -259,31 +262,31 @@ body {
 }
 
 .theme-icon {
-    font-size: 2.5rem;
-    margin-bottom: 8px;
+    font-size: 2.2rem;
+    margin-bottom: 6px;
     display: block;
 }
 
 .theme-card h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #fff;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     font-weight: 600;
 }
 
 .theme-card p {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     color: #a0aec0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .theme-badge {
     display: inline-block;
     background: #00ffcc;
     color: #1a1f3a;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
     font-weight: 700;
 }
 
@@ -292,45 +295,45 @@ body {
     background: rgba(0, 255, 204, 0.1);
     border: 2px solid rgba(0, 255, 204, 0.3);
     color: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 12px;
-    margin-bottom: 25px;
-    max-width: 650px;
+    margin-bottom: 20px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
 
 .rules-box h3 {
-    font-size: 1.3rem;
-    margin-bottom: 12px;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
     text-align: center;
     color: #00ffcc;
 }
 
 .rules-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
 }
 
 .rule-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.05);
-    padding: 10px;
+    padding: 8px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .rule-icon {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
     flex-shrink: 0;
 }
@@ -354,12 +357,12 @@ body {
 }
 
 .rule-text strong {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #fff;
 }
 
 .rule-text span {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     opacity: 0.8;
     color: #a0aec0;
 }
@@ -367,10 +370,10 @@ body {
 /* Difficulty Grid */
 .difficulty-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    margin-bottom: 30px;
-    max-width: 650px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 25px;
+    max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -379,11 +382,11 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
-    padding: 20px 15px;
+    padding: 18px 15px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-height: 150px;
+    min-height: 130px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -416,25 +419,25 @@ body {
 }
 
 .difficulty-icon {
-    font-size: 2rem;
-    margin-bottom: 10px;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
 }
 
 .difficulty-card h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #fff;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     font-weight: 600;
 }
 
 .difficulty-card p {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #a0aec0;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .difficulty-stats {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #718096;
     font-weight: 500;
 }
@@ -443,31 +446,32 @@ body {
 .game-header {
     display: flex;
     justify-content: center;
-    gap: 25px;
-    margin-bottom: 30px;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .stat-card {
     background: rgba(0, 255, 204, 0.1);
     border: 2px solid rgba(0, 255, 204, 0.3);
     color: white;
-    padding: 20px 40px;
+    padding: 15px 30px;
     border-radius: 15px;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    min-width: 150px;
+    min-width: 120px;
 }
 
 .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     opacity: 0.9;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 500;
     color: #a0aec0;
 }
 
 .stat-value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #00ffcc;
 }
@@ -476,9 +480,9 @@ body {
 .game-board {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    max-width: 500px;
-    margin: 0 auto 20px;
+    gap: 12px;
+    max-width: 400px;
+    margin: 0 auto 15px;
 }
 
 .hole {
@@ -491,7 +495,7 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: border-color 0.2s ease;
-    font-size: 3.5rem;
+    font-size: 2.8rem;
     box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.1);
     position: relative;
 }
@@ -565,16 +569,16 @@ body {
 
 .game-hint {
     text-align: center;
-    margin-top: 20px;
-    padding: 15px;
+    margin-top: 15px;
+    padding: 12px;
     background: rgba(0, 255, 204, 0.1);
     border: 2px solid rgba(0, 255, 204, 0.2);
     border-radius: 12px;
 }
 
 .game-hint p {
-    margin: 6px 0;
-    font-size: 1rem;
+    margin: 5px 0;
+    font-size: 0.9rem;
     color: #fff;
 }
 
@@ -800,16 +804,16 @@ body {
 /* Button Group */
 .button-group {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
-    margin-top: 25px;
+    margin-top: 20px;
     flex-wrap: wrap;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
     .leaderboard-panel.visible {
-        width: 300px;
+        width: 280px;
     }
 }
 
@@ -821,25 +825,52 @@ body {
     .leaderboard-panel.visible {
         width: 100%;
         margin-left: 0;
-        margin-top: 20px;
+        margin-top: 15px;
+    }
+    
+    .game-logo h1 {
+        font-size: 2.2rem;
     }
     
     .theme-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     }
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 5px;
+    }
+    
+    .game-container {
+        padding: 15px;
+    }
+    
     .game-logo h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
+    }
+    
+    .logo-icon {
+        font-size: 3rem;
     }
     
     .theme-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .theme-card {
+        min-height: 100px;
+        padding: 12px 8px;
+    }
+    
+    .theme-icon {
+        font-size: 1.8rem;
     }
     
     .difficulty-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
     
     .rules-grid {
@@ -847,15 +878,64 @@ body {
     }
     
     .game-board {
-        gap: 12px;
-        max-width: 400px;
+        gap: 10px;
+        max-width: 320px;
     }
     
     .hole {
-        font-size: 3rem;
+        font-size: 2.2rem;
     }
     
-    .game-container {
-        padding: 20px 15px;
+    .btn {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-start {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+    
+    .stat-card {
+        padding: 12px 25px;
+        min-width: 100px;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-logo h1 {
+        font-size: 1.8rem;
+    }
+    
+    .theme-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .game-board {
+        max-width: 280px;
+        gap: 8px;
+    }
+    
+    .hole {
+        font-size: 2rem;
+        border: 2px solid #ddd;
+    }
+    
+    .screen-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .btn {
+        padding: 8px 20px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-start {
+        padding: 10px 25px;
+        font-size: 0.95rem;
     }
 }
