@@ -1,9 +1,9 @@
 // ============================================================================
 // BACKEND API CONFIGURATION
 // ============================================================================
-// IMPORTANT: Update this URL with your Render backend URL after deployment
-const BACKEND_URL = 'https://your-backend-app.onrender.com';
-// For local testing, use: const BACKEND_URL = 'http://localhost:8080';
+// For local development: http://localhost:5000
+// For production: Update with your deployed backend URL
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
 console.log('Backend API URL:', BACKEND_URL);
 
