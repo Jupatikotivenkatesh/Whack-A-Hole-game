@@ -1,39 +1,61 @@
-// ============================================================================
-// BACKEND API CONFIGURATION
-// ============================================================================
-// For local development: http://localhost:5000
-// For production: Update with your deployed backend URL
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+// Backend API Configuration
+const BACKEND_URL = 'http://localhost:8080';
 
-console.log('Backend API URL:', BACKEND_URL);
+// Theme Configuration with correct and wrong targets
+const THEMES = {
+    classic: {
+        correct: '🐹',
+        wrong: '🐭',
+        name: 'Classic'
+    },
+    forest: {
+        correct: '🦝',
+        wrong: '🐿️',
+        name: 'Forest'
+    },
+    space: {
+        correct: '👽',
+        wrong: '👾',
+        name: 'Space'
+    },
+    ocean: {
+        correct: '🐙',
+        wrong: '🦑',
+        name: 'Ocean'
+    },
+    candy: {
+        correct: '🍭',
+        wrong: '🍬',
+        name: 'Candy'
+    }
+};
+
+// Difficulty Settings
+const DIFFICULTY_SETTINGS = {
+    easy: { targetTime: 2000, spawnRate: 1500 },
+    medium: { targetTime: 1500, spawnRate: 1000 },
+    hard: { targetTime: 1000, spawnRate: 700 }
+};
 
 // Game State
 let selectedTheme = null;
 let selectedDifficulty = null;
 let score = 0;
-let timeLeft = 30;
+let timeLeft = 45;
 let gameInterval = null;
-let moleInterval = null;
-let currentMole = null;
-let moleTimeout = null;
+let spawnInterval = null;
+let currentTargets = [];
+let playerPreviousBest = 0;
 
-// Theme icons
-const themeIcons = {
-    classic: '🐹',
-    forest: '🦝',
-    space: '👽'
-};
-
-// Difficulty settings
-const difficultySettings = {
-    easy: { moleTime: 2000, spawnRate: 1500 },
-    medium: { moleTime: 1500, spawnRate: 1000 },
-    hard: { moleTime: 1000, spawnRate: 700 }
-};
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadLeaderboard();
+    // Refresh leaderboard every 10 seconds
+    setInterval(loadLeaderboard, 10000);
+});
 
 // Screen Navigation
 function showScreen(screenId) {
-    console.log('Showing screen:', screenId);
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
@@ -45,7 +67,6 @@ function showSplash() {
 }
 
 function showThemeSelection() {
-    console.log('Showing theme selection');
     showScreen('themeScreen');
 }
 
@@ -54,43 +75,26 @@ function showDifficultySelection() {
         alert('Please select a theme first!');
         return;
     }
-    console.log('Showing difficulty selection');
     showScreen('difficultyScreen');
 }
 
 // Theme Selection
 function selectTheme(theme) {
-    console.log('Theme selected:', theme);
     selectedTheme = theme;
-    
-    // Update UI
     document.querySelectorAll('.theme-card').forEach(card => {
         card.classList.remove('selected');
     });
     event.target.closest('.theme-card').classList.add('selected');
-    
-    // Enable next button
     document.getElementById('themeNextBtn').disabled = false;
-    
-    // Update mole icons
-    const moleIcon = themeIcons[theme];
-    document.querySelectorAll('.mole').forEach(mole => {
-        mole.textContent = moleIcon;
-    });
 }
 
 // Difficulty Selection
 function selectDifficulty(difficulty) {
-    console.log('Difficulty selected:', difficulty);
     selectedDifficulty = difficulty;
-    
-    // Update UI
     document.querySelectorAll('.difficulty-card').forEach(card => {
         card.classList.remove('selected');
     });
     event.target.closest('.difficulty-card').classList.add('selected');
-    
-    // Enable start button
     document.getElementById('difficultyNextBtn').disabled = false;
 }
 
@@ -101,13 +105,17 @@ function startGame() {
         return;
     }
 
-    console.log('Starting game with theme:', selectedTheme, 'difficulty:', selectedDifficulty);
-    
     // Reset game state
     score = 0;
-    timeLeft = 30;
+    timeLeft = 45;
+    currentTargets = [];
+    
+    // Update UI
     document.getElementById('score').textContent = score;
     document.getElementById('timer').textContent = timeLeft;
+    
+    // Create game board
+    createGameBoard();
     
     // Show game screen
     showScreen('gameScreen');
@@ -122,76 +130,164 @@ function startGame() {
         }
     }, 1000);
     
-    // Start spawning moles
-    const settings = difficultySettings[selectedDifficulty];
-    spawnMole();
-    moleInterval = setInterval(spawnMole, settings.spawnRate);
+    // Start spawning targets
+    const settings = DIFFICULTY_SETTINGS[selectedDifficulty];
+    spawnInterval = setInterval(() => spawnTarget(), settings.spawnRate);
+    spawnTarget(); // Spawn first target immediately
 }
 
-function spawnMole() {
-    // Remove previous mole
-    if (currentMole !== null) {
-        const holes = document.querySelectorAll('.hole');
-        holes[currentMole].classList.remove('active');
+function createGameBoard() {
+    const gameBoard = document.getElementById('gameBoard');
+    gameBoard.innerHTML = '';
+    
+    for (let i = 0; i < 9; i++) {
+        const hole = document.createElement('div');
+        hole.className = 'hole';
+        hole.dataset.index = i;
+        hole.onclick = () => hitTarget(i);
+        gameBoard.appendChild(hole);
     }
-    
-    // Spawn new mole
-    const randomHole = Math.floor(Math.random() * 9);
-    currentMole = randomHole;
-    const holes = document.querySelectorAll('.hole');
-    holes[randomHole].classList.add('active');
-    
-    // Auto-hide mole after time
-    const settings = difficultySettings[selectedDifficulty];
-    clearTimeout(moleTimeout);
-    moleTimeout = setTimeout(() => {
-        if (currentMole === randomHole) {
-            holes[randomHole].classList.remove('active');
-            currentMole = null;
+}
+
+function spawnTarget() {
+    // Clear previous targets
+    currentTargets.forEach(target => {
+        const hole = document.querySelector(`[data-index="${target.index}"]`);
+        if (hole) {
+            hole.textContent = '';
+            hole.classList.remove('active-correct', 'active-wrong');
         }
-    }, settings.moleTime);
+    });
+    currentTargets = [];
+    
+    // Spawn 1-2 targets
+    const numTargets = Math.random() < 0.7 ? 1 : 2;
+    const availableHoles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    
+    for (let i = 0; i < numTargets; i++) {
+        if (availableHoles.length === 0) break;
+        
+        const randomIndex = Math.floor(Math.random() * availableHoles.length);
+        const holeIndex = availableHoles.splice(randomIndex, 1)[0];
+        
+        // 70% chance of correct target, 30% chance of wrong target
+        const isCorrect = Math.random() < 0.7;
+        const theme = THEMES[selectedTheme];
+        
+        const target = {
+            index: holeIndex,
+            isCorrect: isCorrect,
+            emoji: isCorrect ? theme.correct : theme.wrong
+        };
+        
+        currentTargets.push(target);
+        
+        const hole = document.querySelector(`[data-index="${holeIndex}"]`);
+        hole.textContent = target.emoji;
+        hole.classList.add(isCorrect ? 'active-correct' : 'active-wrong');
+    }
+    
+    // Auto-hide targets after time
+    const settings = DIFFICULTY_SETTINGS[selectedDifficulty];
+    setTimeout(() => {
+        currentTargets.forEach(target => {
+            const hole = document.querySelector(`[data-index="${target.index}"]`);
+            if (hole) {
+                hole.textContent = '';
+                hole.classList.remove('active-correct', 'active-wrong');
+            }
+        });
+        currentTargets = [];
+    }, settings.targetTime);
 }
 
-function whackMole(holeIndex) {
-    if (currentMole === holeIndex) {
-        console.log('Hit! Score:', score + 10);
+function hitTarget(holeIndex) {
+    const target = currentTargets.find(t => t.index === holeIndex);
+    
+    if (!target) return; // No target at this hole
+    
+    const hole = document.querySelector(`[data-index="${holeIndex}"]`);
+    
+    if (target.isCorrect) {
+        // Correct hit: +10 points
         score += 10;
-        document.getElementById('score').textContent = score;
-        
-        // Remove mole
-        const holes = document.querySelectorAll('.hole');
-        holes[holeIndex].classList.remove('active');
-        currentMole = null;
-        
-        // Spawn new mole immediately
-        clearTimeout(moleTimeout);
-        spawnMole();
+        hole.classList.add('hit-correct');
+        showScorePopup(holeIndex, '+10', '#4caf50');
+    } else {
+        // Wrong hit: -10 points
+        score -= 10;
+        hole.classList.add('hit-wrong');
+        showScorePopup(holeIndex, '-10', '#f44336');
     }
+    
+    // Update score display
+    document.getElementById('score').textContent = score;
+    
+    // Remove target
+    hole.textContent = '';
+    hole.classList.remove('active-correct', 'active-wrong');
+    currentTargets = currentTargets.filter(t => t.index !== holeIndex);
+    
+    // Remove hit animation after delay
+    setTimeout(() => {
+        hole.classList.remove('hit-correct', 'hit-wrong');
+    }, 500);
+}
+
+function showScorePopup(holeIndex, text, color) {
+    const hole = document.querySelector(`[data-index="${holeIndex}"]`);
+    const popup = document.createElement('div');
+    popup.textContent = text;
+    popup.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        font-weight: bold;
+        color: ${color};
+        pointer-events: none;
+        animation: scorePopup 1s ease forwards;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes scorePopup {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -100%) scale(1.5); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    hole.style.position = 'relative';
+    hole.appendChild(popup);
+    
+    setTimeout(() => {
+        popup.remove();
+        style.remove();
+    }, 1000);
 }
 
 function endGame() {
-    console.log('Game ended. Final score:', score);
-    
     // Stop intervals
     clearInterval(gameInterval);
-    clearInterval(moleInterval);
-    clearTimeout(moleTimeout);
+    clearInterval(spawnInterval);
     
-    // Remove active mole
-    if (currentMole !== null) {
-        const holes = document.querySelectorAll('.hole');
-        holes[currentMole].classList.remove('active');
-    }
+    // Clear targets
+    currentTargets.forEach(target => {
+        const hole = document.querySelector(`[data-index="${target.index}"]`);
+        if (hole) {
+            hole.textContent = '';
+            hole.classList.remove('active-correct', 'active-wrong');
+        }
+    });
     
     // Show game over screen
     document.getElementById('finalScore').textContent = score;
     showScreen('gameOverScreen');
-    
-    // Load leaderboard
-    loadLeaderboard();
 }
 
-// Backend API Integration
+// Save Score
 async function saveScore() {
     const playerName = document.getElementById('playerName').value.trim();
     
@@ -199,8 +295,6 @@ async function saveScore() {
         alert('Please enter your name!');
         return;
     }
-    
-    console.log('Saving score:', { playerName, score, selectedTheme, selectedDifficulty });
     
     try {
         const response = await fetch(`${BACKEND_URL}/api/scores`, {
@@ -218,37 +312,83 @@ async function saveScore() {
         
         if (response.ok) {
             const data = await response.json();
-            console.log('Score saved successfully:', data);
-            alert('Score saved successfully!');
+            console.log('Score saved:', data);
+            
+            // Show appropriate message and animation
+            const messageEl = document.getElementById('scoreMessage');
+            messageEl.textContent = data.message;
+            messageEl.className = `score-message ${data.animation}`;
+            
+            // Trigger celebration animation if new high score
+            if (data.animation === 'celebration') {
+                triggerFireworks();
+            }
+            
+            // Reload leaderboard
             loadLeaderboard();
         } else {
-            const error = await response.text();
-            console.error('Failed to save score. Status:', response.status, 'Error:', error);
-            alert('Failed to save score. Backend might not be running.');
+            alert('Failed to save score. Please try again.');
         }
     } catch (error) {
         console.error('Error saving score:', error);
-        alert('Error connecting to backend. Make sure backend is deployed and BACKEND_URL is correct.');
+        alert('Error connecting to server. Make sure backend is running.');
     }
 }
 
-async function loadLeaderboard() {
-    console.log('Loading leaderboard...');
+// Fireworks Animation
+function triggerFireworks() {
+    const container = document.getElementById('fireworksContainer');
+    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight * 0.5;
+            createFirework(x, y, colors[Math.floor(Math.random() * colors.length)]);
+        }, i * 100);
+    }
+}
+
+function createFirework(x, y, color) {
+    const particles = 30;
+    
+    for (let i = 0; i < particles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'firework';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.background = color;
+        
+        const angle = (Math.PI * 2 * i) / particles;
+        const velocity = 50 + Math.random() * 50;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        
+        particle.style.setProperty('--tx', tx + 'px');
+        particle.style.setProperty('--ty', ty + 'px');
+        
+        document.getElementById('fireworksContainer').appendChild(particle);
+        
+        setTimeout(() => particle.remove(), 1000);
+    }
+}
+
+// Load Leaderboard
+async function loadLeaderboard() {
     try {
         const response = await fetch(`${BACKEND_URL}/api/leaderboard`);
         
         if (response.ok) {
             const scores = await response.json();
-            console.log('Leaderboard loaded:', scores);
             displayLeaderboard(scores);
         } else {
-            console.error('Failed to load leaderboard. Status:', response.status);
-            document.getElementById('leaderboardList').innerHTML = '<p>Failed to load leaderboard</p>';
+            document.getElementById('leaderboardList').innerHTML = 
+                '<div class="loading">Failed to load leaderboard</div>';
         }
     } catch (error) {
         console.error('Error loading leaderboard:', error);
-        document.getElementById('leaderboardList').innerHTML = '<p>Backend not connected</p>';
+        document.getElementById('leaderboardList').innerHTML = 
+            '<div class="loading">Backend not connected</div>';
     }
 }
 
@@ -256,27 +396,33 @@ function displayLeaderboard(scores) {
     const leaderboardList = document.getElementById('leaderboardList');
     
     if (scores.length === 0) {
-        leaderboardList.innerHTML = '<p>No scores yet. Be the first!</p>';
+        leaderboardList.innerHTML = '<div class="loading">No scores yet. Be the first!</div>';
         return;
     }
     
-    leaderboardList.innerHTML = scores.map((entry, index) => `
-        <div class="leaderboard-item">
-            <span>#${index + 1} ${entry.playerName}</span>
-            <span>${entry.score} pts</span>
-        </div>
-    `).join('');
+    const medals = ['🥇', '🥈', '🥉'];
+    
+    leaderboardList.innerHTML = scores.map((entry, index) => {
+        const rankClass = index < 3 ? `rank-${index + 1}` : '';
+        const medal = index < 3 ? medals[index] : `#${index + 1}`;
+        
+        return `
+            <div class="leaderboard-item ${rankClass}">
+                <div class="player-info">
+                    <span class="rank-badge">${medal}</span>
+                    <span class="player-name">${entry.playerName}</span>
+                </div>
+                <span class="player-score">${entry.score}</span>
+            </div>
+        `;
+    }).join('');
 }
 
+// Play Again
 function playAgain() {
-    console.log('Playing again...');
     selectedTheme = null;
     selectedDifficulty = null;
+    document.getElementById('playerName').value = '';
+    document.getElementById('scoreMessage').textContent = '';
     showSplash();
 }
-
-// Load leaderboard on page load
-window.addEventListener('load', () => {
-    console.log('Page loaded. Backend URL:', BACKEND_URL);
-    console.log('Remember to update BACKEND_URL in script.js with your Render backend URL!');
-});
