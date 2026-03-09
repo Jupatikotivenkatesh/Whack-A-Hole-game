@@ -1,6 +1,7 @@
 package com.whackamole.dto;
 
 public class ScoreRequest {
+    private Long userId;
     private String playerName;
     private Integer score;
     private String theme;
@@ -16,6 +17,9 @@ public class ScoreRequest {
     }
     
     // Getters and Setters
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+    
     public String getPlayerName() { return playerName; }
     public void setPlayerName(String playerName) { this.playerName = playerName; }
     

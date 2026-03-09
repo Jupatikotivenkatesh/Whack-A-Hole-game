@@ -22,12 +22,25 @@ public class ScoreController {
     
     @PostMapping("/scores")
     public ResponseEntity<Map<String, Object>> saveScore(@RequestBody ScoreRequest request) {
-        Score score = new Score(
-            request.getPlayerName(),
-            request.getScore(),
-            request.getTheme(),
-            request.getDifficulty()
-        );
+        Score score;
+        
+        // Create score with or without userId
+        if (request.getUserId() != null) {
+            score = new Score(
+                request.getUserId(),
+                request.getPlayerName(),
+                request.getScore(),
+                request.getTheme(),
+                request.getDifficulty()
+            );
+        } else {
+            score = new Score(
+                request.getPlayerName(),
+                request.getScore(),
+                request.getTheme(),
+                request.getDifficulty()
+            );
+        }
         
         // Get player's previous best score
         Optional<Score> previousBest = scoreRepository
