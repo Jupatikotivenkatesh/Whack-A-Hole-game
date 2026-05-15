@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole — Enhanced Edition</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Particles Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Fireworks Container -->
+    <div class="fireworks-container" id="fireworksContainer"></div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ===================== AUTH SCREEN ===================== -->
+    <div class="auth-wrapper" id="authWrapper">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <span class="auth-logo-icon">🎯</span>
+                <h1>WHACK-A-MOLE</h1>
+                <p>Enhanced Edition</p>
+            </div>
+
+            <!-- Tab Toggle -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Login</button>
+                <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>🎮 Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>🔒 Password</label>
+                    <div class="input-with-toggle">
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="toggle-pw" onclick="togglePassword('loginPassword', this)">👁</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-auth" id="loginBtn">
+                    <span class="btn-text">Enter the Game</span>
+                    <span class="btn-loader hidden">⏳</span>
+                </button>
+                <p class="auth-switch">New player? <a href="#" onclick="switchAuthTab('signup')">Create account →</a></p>
+            </form>
+
+            <!-- Signup Form -->
+            <form class="auth-form" id="signupForm" onsubmit="handleSignup(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>👤 Full Name</label>
+                        <input type="text" id="signupFullName" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>🎮 Username</label>
+                        <input type="text" id="signupUsername" placeholder="Pick a username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📧 Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>🔒 Password</label>
+                    <div class="input-with-toggle">
+                        <input type="password" id="signupPassword" placeholder="Min. 6 characters" required autocomplete="new-password">
+                        <button type="button" class="toggle-pw" onclick="togglePassword('signupPassword', this)">👁</button>
+                    </div>
+                </div>
+                <div class="password-strength" id="passwordStrength"></div>
+                <button type="submit" class="btn-auth" id="signupBtn">
+                    <span class="btn-text">Join the Game</span>
+                    <span class="btn-loader hidden">⏳</span>
+                </button>
+                <p class="auth-switch">Already a player? <a href="#" onclick="switchAuthTab('login')">← Login</a></p>
+            </form>
+
+            <!-- Guest Option -->
+            <div class="auth-divider"><span>or</span></div>
+            <button class="btn-guest" onclick="continueAsGuest()">🕹 Play as Guest</button>
+        </div>
+    </div>
+
+    <!-- ===================== GAME WRAPPER ===================== -->
+    <div class="main-container hidden" id="mainContainer">
+
+        <!-- Top Nav Bar -->
+        <nav class="top-nav">
+            <div class="nav-brand">🎯 <span>Whack-a-Mole</span></div>
+            <div class="nav-user" id="navUser"></div>
+            <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+        </nav>
+
+        <div class="game-layout">
+            <!-- Game Container -->
+            <div class="game-container">
+
+                <!-- Splash Screen -->
+                <div class="screen active" id="splashScreen">
+                    <div class="splash-content">
+                        <div class="game-logo">
+                            <div class="logo-icon">🎯</div>
+                            <h1>WHACK-A-MOLE</h1>
+                            <p class="tagline">Enhanced Edition</p>
+                        </div>
+                        <div class="splash-stats" id="splashStats"></div>
+                        <button class="btn btn-start" onclick="showThemeSelection()">
+                            <span>START GAME</span>
+                            <span class="btn-icon">▶</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Selection Screen -->
+                <div class="screen" id="themeScreen">
+                    <div class="screen-header">
+                        <h2>Choose Your Theme</h2>
+                        <p class="screen-subtitle">Pick your battlefield</p>
+                    </div>
+                    <div class="theme-grid">
+                        <div class="theme-card" onclick="selectTheme('classic', this)">
+                            <div class="theme-icon">🐹</div>
+                            <h3>Classic</h3>
+                            <p>Traditional mole whacking</p>
+                            <div class="theme-badge">Original</div>
+                        </div>
+                        <div class="theme-card" onclick="selectTheme('forest', this)">
+                            <div class="theme-icon">🦝</div>
+                            <h3>Forest</h3>
+                            <p>Woodland creatures</p>
+                            <div class="theme-badge">Nature</div>
+                        </div>
+                        <div class="theme-card" onclick="selectTheme('space', this)">
+                            <div class="theme-icon">👽</div>
+                            <h3>Space</h3>
+                            <p>Alien invasion</p>
+                            <div class="theme-badge">Sci-Fi</div>
+                        </div>
+                        <div class="theme-card" onclick="selectTheme('ocean', this)">
+                            <div class="theme-icon">🐙</div>
+                            <h3>Ocean</h3>
+                            <p>Deep sea adventure</p>
+                            <div class="theme-badge">New</div>
+                        </div>
+                        <div class="theme-card" onclick="selectTheme('candy', this)">
+                            <div class="theme-icon">🍭</div>
+                            <h3>Candy</h3>
+                            <p>Sweet treats</p>
+                            <div class="theme-badge">Sweet</div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="showSplash()">← Back</button>
+                        <button class="btn btn-primary" id="themeNextBtn" onclick="showDifficultySelection()" disabled>Next →</button>
+                    </div>
+                </div>
+
+                <!-- Difficulty Selection Screen -->
+                <div class="screen" id="difficultyScreen">
+                    <div class="screen-header">
+                        <h2>Choose Difficulty</h2>
+                        <p class="screen-subtitle">How brave are you?</p>
+                    </div>
+                    <div class="rules-box">
+                        <h3>📊 Scoring Rules</h3>
+                        <div class="rules-grid">
+                            <div class="rule-item">
+                                <div class="rule-icon correct">✓</div>
+                                <div class="rule-text"><strong>Correct Hit</strong><span>+10 pts</span></div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-icon wrong">✗</div>
+                                <div class="rule-text"><strong>Wrong Hit</strong><span>−10 pts</span></div>
+                            </div>
+                            <div class="rule-item">
+                                <div class="rule-icon time">⏱</div>
+                                <div class="rule-text"><strong>Duration</strong><span>45 sec</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="difficulty-grid">
+                        <div class="difficulty-card easy" onclick="selectDifficulty('easy', this)">
+                            <div class="difficulty-icon">🟢</div>
+                            <h3>Easy</h3>
+                            <p>Relaxed pace</p>
+                            <div class="difficulty-stats">3s per target</div>
+                        </div>
+                        <div class="difficulty-card medium" onclick="selectDifficulty('medium', this)">
+                            <div class="difficulty-icon">🟡</div>
+                            <h3>Medium</h3>
+                            <p>Balanced challenge</p>
+                            <div class="difficulty-stats">2.5s per target</div>
+                        </div>
+                        <div class="difficulty-card hard" onclick="selectDifficulty('hard', this)">
+                            <div class="difficulty-icon">🔴</div>
+                            <h3>Hard</h3>
+                            <p>Expert mode</p>
+                            <div class="difficulty-stats">2s per target</div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="showThemeSelection()">← Back</button>
+                        <button class="btn btn-primary" id="difficultyNextBtn" onclick="startGame()" disabled>Start Game 🎮</button>
+                    </div>
+                </div>
+
+                <!-- Game Screen -->
+                <div class="screen" id="gameScreen">
+                    <div class="game-header">
+                        <div class="stat-card">
+                            <div class="stat-label">Score</div>
+                            <div class="stat-value" id="score">0</div>
+                        </div>
+                        <div class="stat-card timer-card">
+                            <div class="stat-label">Time</div>
+                            <div class="stat-value"><span id="timer">45</span>s</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Hits</div>
+                            <div class="stat-value" id="hitCount">0</div>
+                        </div>
+                    </div>
+                    <div class="game-board" id="gameBoard"></div>
+                    <div class="game-hint">
+                        <span>🎯 Hit <strong>correct</strong> targets</span>
+                        <span>⚠️ Avoid <strong>wrong</strong> targets</span>
+                    </div>
+                </div>
+
+                <!-- Game Over Screen -->
+                <div class="screen" id="gameOverScreen">
+                    <div class="game-over-content">
+                        <h2 class="game-over-title">🎮 Game Over!</h2>
+                        <div class="final-score-card">
+                            <div class="score-label">Final Score</div>
+                            <div class="score-value" id="finalScore">0</div>
+                            <div class="score-meta" id="scoreMeta"></div>
+                        </div>
+                        <div class="score-message" id="scoreMessage"></div>
+                        <div class="name-input-group" id="nameInputGroup">
+                            <label>Save your score as:</label>
+                            <input type="text" class="name-input" id="playerName" placeholder="Enter your name" maxlength="20">
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary" onclick="saveScore()">💾 Save Score</button>
+                            <button class="btn btn-secondary" onclick="playAgain()">🔄 Play Again</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /game-container -->
+
+            <!-- Leaderboard Panel -->
+            <div class="leaderboard-panel" id="leaderboardPanel">
+                <div class="leaderboard-header">
+                    <h2>🏆 Leaderboard</h2>
+                    <p>Top Players</p>
+                </div>
+                <div class="leaderboard-content" id="leaderboardList">
+                    <div class="loading">Loading...</div>
+                </div>
+                <button class="btn-refresh" onclick="loadLeaderboard()">🔄 Refresh</button>
+            </div>
+
+        </div><!-- /game-layout -->
+    </div><!-- /main-container -->
+
+    <script src="script.js"></script>
+</body>
+</html>
