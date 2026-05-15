@@ -1,260 +1,375 @@
-# Whack-a-Mole — Enhanced Edition
+# 🎯 Whack-a-Mole — Enhanced Edition
 
-Full-stack browser game with user auth, leaderboard, and multiple themes.
-
----
-
-## Tech Stack
-
-| Layer    | Technology |
-|----------|-----------|
-| Backend  | Java 17, Spring Boot 3.2, Spring Data JPA |
-| Database | MySQL 8+ |
-| Frontend | HTML5, CSS3, Vanilla JS |
-| Build    | Maven |
+> A fast-paced, reflex-testing browser game. Whack the right targets, dodge the wrong ones, and climb the leaderboard before the clock runs out.
 
 ---
 
-## Project Structure
+## � Table of Contents
 
-```
-whack-a-hole-game/
-├── backend/
-│   ├── src/main/java/com/jkv/whackamole/
-│   │   ├── controller/   AuthController, ScoreController
-│   │   ├── service/      (extend here)
-│   │   ├── repository/   UserRepository, ScoreRepository
-│   │   ├── model/        User, Score
-│   │   ├── dto/          LoginRequest, SignupRequest, ScoreRequest, UserResponse
-│   │   ├── config/       WebConfig (CORS)
-│   │   ├── exception/    (extend here)
-│   │   └── WhackAMoleApplication.java
-│   ├── src/main/resources/
-│   │   ├── application.properties
-│   │   ├── static/
-│   │   └── templates/
-│   ├── pom.xml
-│   └── .gitignore
-├── frontend/
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   ├── assets/  images/ sounds/ icons/
-│   ├── pages/
-│   └── .gitignore
-├── docs/
-│   ├── screenshots/
-│   ├── architecture/
-│   └── api-docs/
-├── README.md
-├── LICENSE
-└── .gitignore
-```
+- [About the Game](#-about-the-game)
+- [Getting Started](#-getting-started)
+- [Login & Account](#-login--account)
+- [How to Play](#-how-to-play)
+- [Themes](#-themes)
+- [Difficulty Levels](#-difficulty-levels)
+- [Scoring Rules](#-scoring-rules)
+- [Leaderboard](#-leaderboard)
+- [Tips & Strategy](#-tips--strategy)
+- [Project Structure](#-project-structure)
+- [API Reference](#-api-reference)
+- [Tech Stack](#-tech-stack)
+- [Run with Docker](#-run-with-docker)
 
 ---
 
-## Local Development
+## 🕹 About the Game
+
+Whack-a-Mole Enhanced Edition is a single-page browser game where targets randomly pop up on a 3×3 grid of holes. Your job is simple — hit the **correct** target as fast as possible and avoid the **wrong** ones. Every correct hit earns you points, every wrong hit costs you points, and you have exactly **45 seconds** to rack up the highest score you can.
+
+The game supports:
+- **5 unique visual themes**, each with its own correct and wrong target pair
+- **3 difficulty levels** that control how fast targets appear and disappear
+- **User accounts** with login, signup, and personal best tracking
+- **A live leaderboard** showing the top 10 scores across all players
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Java 17+
 - Maven 3.8+
 - MySQL 8+
-- Any modern browser
+- Any modern browser (Chrome, Firefox, Edge)
 
-### 1 — Database setup
-
-```sql
-CREATE DATABASE whackamole_db;
-```
-
-### 2 — Configure environment
-
-Set these environment variables (or edit `application.properties`):
+### 1 — Start the backend
 
 ```bash
-SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/whackamole_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-SPRING_DATASOURCE_USERNAME=root
-SPRING_DATASOURCE_PASSWORD=yourpassword
-```
+# Windows — set environment variables
+set SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/whackamole_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+set SPRING_DATASOURCE_USERNAME=root
+set SPRING_DATASOURCE_PASSWORD=yourpassword
 
-### 3 — Run the backend
-
-```bash
-cd backend
-./mvnw spring-boot:run
-# Windows: mvnw.cmd spring-boot:run
+# Run the backend
+cd whack-a-hole-game/backend
+mvnw spring-boot:run
 ```
 
 Backend starts at `http://localhost:8080`
 
-### 4 — Open the frontend
+### 2 — Open the frontend
 
-Open `frontend/index.html` directly in a browser, or serve it:
+**Option A** — Double-click `whack-a-hole-game/frontend/index.html` in File Explorer
 
+**Option B** — VS Code Live Server: right-click `index.html` → Open with Live Server
+
+**Option C** — Terminal:
 ```bash
-# Python
-python -m http.server 3000 --directory frontend
+npx serve whack-a-hole-game/frontend
+# then open http://localhost:3000
+```
 
-# Node (npx)
-npx serve frontend
+> ⚠️ Do not open the folder URL in a browser — always open `index.html` directly.
+
+---
+
+## 🔐 Login & Account
+
+When you open the game, you land on the **auth screen** before anything else. This is where you either create a new account or sign in to an existing one.
+
+### Creating a New Account (Sign Up)
+
+Click the **Sign Up** tab and fill in:
+
+| Field | Description |
+|-------|-------------|
+| Full Name | Your display name (e.g. John Doe) |
+| Username | Unique game handle used to log in (e.g. johnd99) |
+| Email | Your email address |
+| Password | Minimum 6 characters — a strength meter guides you |
+
+Once submitted, your account is created and you're taken straight into the game.
+
+### Logging In to an Existing Account
+
+Click the **Login** tab and enter:
+
+| Field | Description |
+|-------|-------------|
+| Username | The username you registered with |
+| Password | Your account password |
+
+After a successful login, your username appears in the top navigation bar and your personal best score is shown on the lobby screen.
+
+### Playing as a Guest
+
+If you don't want to create an account, click **Play as Guest**. You can play the full game and submit scores to the leaderboard using any display name — but scores won't be linked to a profile.
+
+### Logging Out
+
+Click the **🚪 Logout** button in the top-right corner at any time. You'll be returned to the login screen.
+
+---
+
+## � How to Play
+
+The game flows through five stages:
+
+```
+Auth Screen → Theme Selection → Difficulty Selection → Game → Game Over
+```
+
+### Stage 1 — Auth
+Log in, sign up, or continue as guest (covered above).
+
+### Stage 2 — Theme Selection
+Choose one of 5 themes. Each theme changes the emoji targets that appear on the board. Select a theme and click **Next →**.
+
+### Stage 3 — Difficulty Selection
+Choose Easy, Medium, or Hard. This controls how long targets stay visible and how often new ones appear. Click **Start Game 🎮**.
+
+### Stage 4 — Game
+- A **3×3 grid** of 9 holes appears
+- Targets randomly pop up in the holes
+- Click/tap a target to whack it
+- Up to **2 targets** can appear at the same time
+- The timer counts down from **45 seconds**
+- Your score and hit count update in real time
+- The timer card pulses red when ≤ 10 seconds remain
+- The leaderboard slides in on the right so you can track your position live
+
+### Stage 5 — Game Over
+When the timer hits zero:
+- Your final score, total hits, theme, and difficulty are displayed
+- Logged-in users have their name pre-filled
+- Guests type a display name to save their score
+- Click **💾 Save Score** to submit to the leaderboard
+- Click **🔄 Play Again** to go back to theme selection
+
+---
+
+## 🎨 Themes
+
+Each theme is a complete visual skin for the game. The **correct target** earns you +10 points when hit. The **wrong target** costs you −10 points — they look similar, so stay sharp.
+
+---
+
+### 🐹 Classic
+The original Whack-a-Mole experience. A friendly brown mole pops up from the holes and you need to whack it before it disappears. Watch out for the sneaky mouse that looks almost identical — hitting it will cost you points.
+
+| | Target |
+|--|--------|
+| ✅ Correct | 🐹 Mole |
+| ❌ Wrong | 🐭 Mouse |
+
+---
+
+### 🦝 Forest
+Set in a woodland environment, this theme brings forest creatures to life. A raccoon is your target — but squirrels are also scurrying around the holes trying to trick you. Quick eyes and steady clicks are key here.
+
+| | Target |
+|--|--------|
+| ✅ Correct | 🦝 Raccoon |
+| ❌ Wrong | 🐿️ Squirrel |
+
+---
+
+### 👽 Space
+An alien invasion has begun and you're the last line of defence. Whack the aliens before they escape, but don't hit the space invaders — they're on your side. This theme has the most visually similar pair, making it the trickiest to distinguish under pressure.
+
+| | Target |
+|--|--------|
+| ✅ Correct | 👽 Alien |
+| ❌ Wrong | 👾 Space Invader |
+
+---
+
+### 🐙 Ocean
+Dive into the deep sea and take on the ocean's most elusive creatures. Octopuses are your targets — they're slippery and fast. Squids look almost the same but hitting one will drag your score down. Great theme for players who like a visual challenge.
+
+| | Target |
+|--|--------|
+| ✅ Correct | 🐙 Octopus |
+| ❌ Wrong | 🦑 Squid |
+
+---
+
+### 🍭 Candy
+A sweet and colourful theme perfect for a lighter game session. Lollipops are popping up everywhere and you need to grab them fast. Hard candies are the imposters here — they look tempting but cost you points. Easiest theme to distinguish visually.
+
+| | Target |
+|--|--------|
+| ✅ Correct | 🍭 Lollipop |
+| ❌ Wrong | 🍬 Hard Candy |
+
+---
+
+## ⚡ Difficulty Levels
+
+There are 3 difficulty levels. The difference between them is how long a target stays visible and how frequently new targets spawn. Higher difficulty = faster targets + less time to react.
+
+---
+
+### 🟢 Easy
+
+Targets stay on screen for **3 seconds** and new ones appear every **2.5 seconds**. This gives you enough time to look at both targets if two appear at once, identify the correct one, and click it without rushing. Recommended for first-time players or anyone warming up.
+
+**Rules:**
+- Target visible for: 3 seconds
+- New target spawns every: 2.5 seconds
+- Up to 2 targets at once
+- Same scoring as all levels (+10 / −10)
+
+---
+
+### � Medium
+
+Targets stay for **2.5 seconds** and spawn every **2 seconds**. The pace picks up noticeably — you'll need to react faster and can't afford to hesitate. Two targets appearing simultaneously becomes more common, and you'll need to make quick decisions about which one to hit first.
+
+**Rules:**
+- Target visible for: 2.5 seconds
+- New target spawns every: 2 seconds
+- Up to 2 targets at once
+- Misreads are more costly at this pace
+
+---
+
+### 🔴 Hard
+
+Targets only stay for **2 seconds** and spawn every **1.5 seconds**. At this level the board is almost always active with targets appearing and disappearing rapidly. You have very little time to think — muscle memory and pattern recognition take over. One wrong click can undo two correct ones.
+
+**Rules:**
+- Target visible for: 2 seconds
+- New target spawns every: 1.5 seconds
+- Up to 2 targets at once
+- Mistakes are punishing — one wrong hit = −10, same as a correct hit earns
+
+---
+
+## 📊 Scoring Rules
+
+| Action | Points |
+|--------|--------|
+| Hit the correct target | **+10** |
+| Hit the wrong target | **−10** |
+| Target disappears (miss) | **0** |
+| Click an empty hole | **0** |
+
+- Your score **can go negative** if you keep hitting wrong targets
+- There is no bonus for speed — only accuracy matters
+- The game always runs for exactly **45 seconds** regardless of score
+- After saving, the game compares your score to your previous best and shows one of four messages:
+  - 🎉 **New High Score** — beat your personal best
+  - 💪 **Same as your best** — matched it exactly
+  - 💜 **Keep trying** — below your best
+  - 🎮 **First score** — your first ever submission
+
+---
+
+## 🏆 Leaderboard
+
+- Displays the **top 10 scores** across all players globally
+- Visible as a side panel during gameplay
+- Auto-refreshes every **10 seconds** while a game is active
+- Can be manually refreshed with the **🔄 Refresh** button
+- Top 3 positions show 🥇 🥈 🥉 medals
+- Logged-in users can see their **personal best** on the lobby screen before starting
+
+---
+
+## 💡 Tips & Strategy
+
+- **Identify before you click** — glance at both targets when two appear. One wrong click costs as much as a correct one earns.
+- **Focus on correct targets only** — ignoring a wrong target costs nothing. Hitting it costs 10 points.
+- **On Hard mode, prioritise** — if two targets appear, go for the correct one immediately and let the wrong one disappear.
+- **Don't panic near the end** — the last 10 seconds feel rushed but the scoring rules don't change. Stay accurate.
+- **Guest scores still count** — you can top the leaderboard as a guest, just enter a memorable name at game over.
+- **Space theme is the hardest visually** — 👽 and 👾 look very similar at speed. If you're new, start with Candy or Classic.
+
+---
+
+## 🗂 Project Structure
+
+```
+whack-a-hole-game/
+├── backend/
+│   ├── src/main/java/com/jkv/whackamole/
+│   │   ├── controller/     AuthController, ScoreController
+│   │   ├── model/          User, Score
+│   │   ├── repository/     UserRepository, ScoreRepository
+│   │   ├── dto/            LoginRequest, SignupRequest, ScoreRequest, UserResponse
+│   │   ├── config/         WebConfig (CORS)
+│   │   ├── service/        (extend here)
+│   │   ├── exception/      (extend here)
+│   │   └── WhackAMoleApplication.java
+│   ├── src/main/resources/
+│   │   └── application.properties
+│   ├── Dockerfile
+│   └── pom.xml
+├── frontend/
+│   ├── index.html          Single-page app — auth + all game screens
+│   ├── style.css           All styles and animations
+│   ├── script.js           All game logic, auth, leaderboard
+│   └── assets/             images / sounds / icons
+├── docs/
+│   ├── screenshots/
+│   ├── architecture/
+│   └── api-docs/
+├── docker-compose.yml
+├── LICENSE
+└── README.md
 ```
 
 ---
 
-## API Endpoints
+## 🔌 API Reference
 
-| Method | Endpoint              | Description        |
-|--------|-----------------------|--------------------|
-| GET    | /api/health           | Health check       |
-| POST   | /api/auth/signup      | Register user      |
-| POST   | /api/auth/login       | Login user         |
-| GET    | /api/auth/profile/:id | Get profile        |
-| PUT    | /api/auth/profile/:id | Update profile     |
-| POST   | /api/scores           | Save score         |
-| GET    | /api/leaderboard      | Top 10 scores      |
-
----
-
-## Deployment Guide
-
-### Option A — Single JAR (backend serves frontend)
-
-1. Copy frontend files into `backend/src/main/resources/static/`
-2. Build the fat JAR:
-   ```bash
-   cd backend
-   ./mvnw clean package -DskipTests
-   ```
-3. Run:
-   ```bash
-   java -jar target/whackamole-backend.jar \
-     --SPRING_DATASOURCE_URL=jdbc:mysql://DB_HOST:3306/whackamole_db \
-     --SPRING_DATASOURCE_USERNAME=root \
-     --SPRING_DATASOURCE_PASSWORD=secret
-   ```
-4. Visit `http://your-server:8080`
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Server health check |
+| POST | `/api/auth/signup` | Register a new user |
+| POST | `/api/auth/login` | Login with username + password |
+| GET | `/api/auth/profile/:id` | Get user profile |
+| PUT | `/api/auth/profile/:id` | Update user profile |
+| POST | `/api/scores` | Submit a score |
+| GET | `/api/leaderboard` | Get top 10 scores |
 
 ---
 
-### Option B — Separate deployment (recommended for production)
+## 🛠 Tech Stack
 
-#### Backend — Deploy to a VPS / cloud VM
-
-```bash
-# Build
-cd backend && ./mvnw clean package -DskipTests
-
-# Transfer JAR
-scp target/whackamole-backend.jar user@server:/opt/whackamole/
-
-# Run as a systemd service (Linux)
-sudo nano /etc/systemd/system/whackamole.service
-```
-
-```ini
-[Unit]
-Description=Whack-a-Mole Backend
-After=network.target
-
-[Service]
-User=ubuntu
-WorkingDirectory=/opt/whackamole
-ExecStart=/usr/bin/java -jar whackamole-backend.jar
-Environment="SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/whackamole_db?useSSL=false&serverTimezone=UTC"
-Environment="SPRING_DATASOURCE_USERNAME=root"
-Environment="SPRING_DATASOURCE_PASSWORD=secret"
-Environment="PORT=8080"
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl enable whackamole
-sudo systemctl start whackamole
-```
-
-#### Frontend — Deploy to Netlify / Vercel / GitHub Pages
-
-1. Update `BACKEND_URL` in `frontend/script.js` to your server's public URL:
-   ```js
-   const BACKEND_URL = 'https://api.yourdomain.com';
-   ```
-2. Push `frontend/` to GitHub and connect to Netlify/Vercel, or:
-   ```bash
-   # Netlify CLI
-   npx netlify deploy --dir frontend --prod
-   ```
-
-#### CORS — Update for production
-
-In `WebConfig.java`, replace `*` with your frontend domain:
-```java
-.allowedOrigins("https://yourgame.netlify.app")
-```
+| Layer | Technology |
+|-------|-----------|
+| Backend | Java 17, Spring Boot 3.2, Spring Data JPA |
+| Database | MySQL 8 |
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Fonts | Orbitron, Inter (Google Fonts) |
+| Build | Maven |
+| Deploy | Docker / systemd / Netlify |
 
 ---
 
-### Option C — Docker Compose
+## 🐳 Run with Docker
 
-Create `docker-compose.yml` at project root:
-
-```yaml
-version: '3.8'
-services:
-  db:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: whackamole_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-
-  backend:
-    build: ./backend
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/whackamole_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secret
-    depends_on:
-      - db
-
-volumes:
-  db_data:
-```
-
-Add a `Dockerfile` inside `backend/`:
-
-```dockerfile
-FROM eclipse-temurin:17-jdk-alpine AS build
-WORKDIR /app
-COPY . .
-RUN ./mvnw clean package -DskipTests
-
-FROM eclipse-temurin:17-jre-alpine
-WORKDIR /app
-COPY --from=build /app/target/whackamole-backend.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
-
-Run everything:
 ```bash
 docker-compose up --build
 ```
 
+Starts MySQL and the Spring Boot backend together. Then open `frontend/index.html` in your browser.
+
 ---
 
-## Environment Variables Reference
+## ⚙️ Environment Variables
 
-| Variable                  | Default                          | Description          |
-|---------------------------|----------------------------------|----------------------|
-| SPRING_DATASOURCE_URL     | jdbc:mysql://localhost:3306/...  | MySQL connection URL |
-| SPRING_DATASOURCE_USERNAME| root                             | DB username          |
-| SPRING_DATASOURCE_PASSWORD| root                             | DB password          |
-| PORT                      | 8080                             | Server port          |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/whackamole_db` | MySQL connection URL |
+| `SPRING_DATASOURCE_USERNAME` | `root` | Database username |
+| `SPRING_DATASOURCE_PASSWORD` | `root` | Database password |
+| `PORT` | `8080` | Backend server port |
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE)
