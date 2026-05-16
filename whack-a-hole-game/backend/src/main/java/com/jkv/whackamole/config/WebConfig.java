@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     // Set ALLOWED_ORIGINS env var in Render to your Netlify URL
-    // e.g. https://whackamole.netlify.app
     // Defaults to * so local dev still works without any config
     @Value("${ALLOWED_ORIGINS:*}")
     private String allowedOrigins;

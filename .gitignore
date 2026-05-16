@@ -7,7 +7,7 @@
 .DS_Store
 Thumbs.db
 
-# Old duplicate folders (real project is inside whack-a-hole-game/)
-backend/
-frontend/
-database/
+# Only ignore OLD root-level duplicate folders (not inside whack-a-hole-game/)
+/backend/
+/frontend/
+/database/

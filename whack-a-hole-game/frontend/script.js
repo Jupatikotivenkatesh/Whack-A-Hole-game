@@ -8,7 +8,7 @@
 // Production → your Render service URL (replace the string below after deploying)
 const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8080'
-    : 'https://whackamole-backend.onrender.com';  // ← replace with your Render URL
+    : 'https://whack-a-hole-game.onrender.com';
 
 // ── Themes ──────────────────────────────────────────
 const THEMES = {
