@@ -4,7 +4,8 @@
    ===================================================== */
 
 // ── Backend URL ──────────────────────────────────────────────────────────────
-const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+// localhost = local dev, anything else (Netlify, Capacitor app) = Render
+const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:8080'
     : 'https://whack-a-hole-game.onrender.com';
 

@@ -17,7 +17,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOriginPatterns(allowedOrigins)
+                .allowedOriginPatterns(
+                    allowedOrigins,
+                    "capacitor://localhost",   // Android Capacitor
+                    "ionic://localhost",        // iOS Capacitor
+                    "http://localhost",
+                    "https://localhost"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
