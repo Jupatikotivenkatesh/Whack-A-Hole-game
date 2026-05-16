@@ -1,17 +1,18 @@
 services:
   - type: web
     name: whackamole-backend
-    runtime: java
+    runtime: docker
+    dockerfilePath: ./Dockerfile        # relative to repo root (whack-a-hole-game/)
     region: oregon
     plan: free
-    buildCommand: cd backend && ./mvnw clean package -DskipTests
-    startCommand: java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -jar backend/target/whackamole-backend.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
-        sync: false          # you paste this in Render dashboard
+        sync: false          # paste your Clever Cloud JDBC URL in Render dashboard
       - key: SPRING_DATASOURCE_USERNAME
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false          # paste your Netlify URL e.g. https://yourapp.netlify.app
       - key: PORT
-        value: 8080
+        value: "8080"
