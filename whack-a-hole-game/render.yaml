@@ -2,17 +2,19 @@ services:
   - type: web
     name: whackamole-backend
     runtime: docker
-    dockerfilePath: ./Dockerfile        # relative to repo root (whack-a-hole-game/)
+    dockerfilePath: ./Dockerfile   # relative to rootDir below
+    dockerContext: .               # build context = rootDir
     region: oregon
     plan: free
+    rootDir: whack-a-hole-game     # tells Render to cd into this folder first
     envVars:
       - key: SPRING_DATASOURCE_URL
-        sync: false          # paste your Clever Cloud JDBC URL in Render dashboard
+        sync: false
       - key: SPRING_DATASOURCE_USERNAME
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
       - key: ALLOWED_ORIGINS
-        sync: false          # paste your Netlify URL e.g. https://yourapp.netlify.app
+        sync: false
       - key: PORT
         value: "8080"
