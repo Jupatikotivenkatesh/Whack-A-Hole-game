@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: whackamole-backend
+    runtime: java
+    region: oregon
+    plan: free
+    buildCommand: cd backend && ./mvnw clean package -DskipTests
+    startCommand: java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -jar backend/target/whackamole-backend.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false          # you paste this in Render dashboard
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: PORT
+        value: 8080
