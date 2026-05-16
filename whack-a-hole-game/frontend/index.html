@@ -28,6 +28,21 @@
                 <p>Enhanced Edition</p>
             </div>
 
+            <!-- Server status banner — shown while backend is waking up -->
+            <div class="server-status" id="serverStatus">
+                <div class="server-status-inner">
+                    <div class="status-spinner"></div>
+                    <div class="status-text">
+                        <span class="status-title" id="statusTitle">Connecting to server…</span>
+                        <span class="status-sub" id="statusSub">This takes up to 30s on first visit</span>
+                    </div>
+                    <div class="status-dot" id="statusDot"></div>
+                </div>
+                <div class="status-bar-track">
+                    <div class="status-bar-fill" id="statusBarFill"></div>
+                </div>
+            </div>
+
             <!-- Tab Toggle -->
             <div class="auth-tabs">
                 <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Login</button>

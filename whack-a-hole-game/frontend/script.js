@@ -4,11 +4,84 @@
    ===================================================== */
 
 // ── Backend URL ──────────────────────────────────────────────────────────────
-// Local dev  → Spring Boot on :8080
-// Production → your Render service URL (replace the string below after deploying)
 const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8080'
     : 'https://whack-a-hole-game.onrender.com';
+
+// ── Server warm-up ───────────────────────────────────────────────────────────
+// Render free tier sleeps after 15 min. This pings /api/health immediately on
+// page load and shows a live progress bar so users know what's happening.
+let serverReady = false;
+
+function updateStatus(title, sub, pct, done = false) {
+    const el    = document.getElementById('serverStatus');
+    const tEl   = document.getElementById('statusTitle');
+    const sEl   = document.getElementById('statusSub');
+    const bar   = document.getElementById('statusBarFill');
+    if (!el) return;
+    if (tEl) tEl.textContent = title;
+    if (sEl) sEl.textContent = sub;
+    if (bar) bar.style.width = pct + '%';
+    if (done) {
+        el.classList.add('ready');
+        // hide the banner after 2s once ready
+        setTimeout(() => el.classList.add('hidden'), 2000);
+    }
+}
+
+async function warmUpServer() {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+        // Local dev — skip the banner entirely
+        document.getElementById('serverStatus')?.classList.add('hidden');
+        serverReady = true;
+        return;
+    }
+
+    updateStatus('Connecting to server…', 'Waking up — this takes up to 30s on first visit', 5);
+
+    // Animate the bar while waiting so it doesn't look frozen
+    const steps = [
+        { delay: 2000,  pct: 15, sub: 'Starting backend…' },
+        { delay: 5000,  pct: 30, sub: 'Loading database connection…' },
+        { delay: 10000, pct: 50, sub: 'Almost there…' },
+        { delay: 18000, pct: 70, sub: 'Still waking up — nearly ready…' },
+        { delay: 26000, pct: 85, sub: 'Taking a little longer than usual…' },
+    ];
+    const timers = steps.map(s =>
+        setTimeout(() => updateStatus(
+            document.getElementById('statusTitle')?.textContent || 'Connecting…',
+            s.sub, s.pct
+        ), s.delay)
+    );
+
+    const start = Date.now();
+    let attempts = 0;
+    while (Date.now() - start < 55000) {          // try for up to 55s
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/health`, {
+                method: 'GET',
+                signal: AbortSignal.timeout(6000),
+            });
+            if (res.ok) {
+                timers.forEach(clearTimeout);
+                serverReady = true;
+                updateStatus('✅ Server ready!', 'You can sign up or log in now', 100, true);
+                return;
+            }
+        } catch { /* keep retrying */ }
+        attempts++;
+        await new Promise(r => setTimeout(r, 3000));  // wait 3s between retries
+    }
+
+    // Timed out — still let them try, just warn
+    timers.forEach(clearTimeout);
+    updateStatus('⚠️ Server slow to respond', 'Try signing up anyway — it may still work', 90);
+    serverReady = true;
+}
+
+// Start warm-up immediately when script loads
+warmUpServer();
 
 // ── Themes ──────────────────────────────────────────
 const THEMES = {
@@ -66,7 +139,6 @@ function togglePassword(inputId, btn) {
     btn.textContent = isText ? '👁' : '🙈';
 }
 
-// Password strength meter
 document.addEventListener('DOMContentLoaded', () => {
     const pwInput = document.getElementById('signupPassword');
     if (pwInput) {
@@ -94,13 +166,22 @@ async function handleLogin(e) {
     const password = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
 
+    if (!serverReady) {
+        showToast('Server is still waking up — please wait a moment ⏳', 'info', 4000);
+        return;
+    }
+
     setAuthLoading(btn, true);
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 35000);
         const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         const data = await res.json();
         if (data.success) {
             currentUser = data.user;
@@ -109,8 +190,12 @@ async function handleLogin(e) {
         } else {
             showToast(data.message || 'Login failed', 'error');
         }
-    } catch {
-        showToast('Cannot reach server. Check backend is running.', 'error');
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            showToast('Server took too long — please try again ⏳', 'error', 5000);
+        } else {
+            showToast('Cannot reach server. Check your connection.', 'error');
+        }
     } finally {
         setAuthLoading(btn, false);
     }
@@ -124,13 +209,22 @@ async function handleSignup(e) {
     const password = document.getElementById('signupPassword').value;
     const btn = document.getElementById('signupBtn');
 
+    if (!serverReady) {
+        showToast('Server is still waking up — please wait a moment ⏳', 'info', 4000);
+        return;
+    }
+
     setAuthLoading(btn, true);
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 35000);
         const res = await fetch(`${BACKEND_URL}/api/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullName, username, email, password }),
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         const data = await res.json();
         if (data.success) {
             currentUser = data.user;
@@ -139,8 +233,12 @@ async function handleSignup(e) {
         } else {
             showToast(data.message || 'Signup failed', 'error');
         }
-    } catch {
-        showToast('Cannot reach server. Check backend is running.', 'error');
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            showToast('Server took too long — please try again ⏳', 'error', 5000);
+        } else {
+            showToast('Cannot reach server. Check your connection.', 'error');
+        }
     } finally {
         setAuthLoading(btn, false);
     }

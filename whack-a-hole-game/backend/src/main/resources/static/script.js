@@ -4,11 +4,16 @@
    ===================================================== */
 
 // ── Backend URL ──────────────────────────────────────────────────────────────
-// Local dev  → Spring Boot on :8080
-// Production → your Render service URL (replace the string below after deploying)
 const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8080'
     : 'https://whack-a-hole-game.onrender.com';
+
+// ── Wake up Render backend on page load (free tier spins down after 15 min) ──
+// Silently pings /api/health so the server is warm before the user hits signup
+(function pingBackend() {
+    fetch(`${BACKEND_URL}/api/health`, { method: 'GET' })
+        .catch(() => { /* silent — just waking the server */ });
+})();
 
 // ── Themes ──────────────────────────────────────────
 const THEMES = {
@@ -27,7 +32,7 @@ const DIFFICULTY = {
 };
 
 // ── State ────────────────────────────────────────────
-let currentUser   = null;   // { id, username, fullName } or { guest: true, username }
+let currentUser   = null;
 let selectedTheme = null;
 let selectedDiff  = null;
 let score         = 0;
@@ -36,7 +41,7 @@ let timeLeft      = 45;
 let gameInterval  = null;
 let spawnInterval = null;
 let lbInterval    = null;
-let targets       = [];     // active holes
+let targets       = [];
 
 // ════════════════════════════════════════════════════
 //  TOAST
@@ -66,8 +71,11 @@ function togglePassword(inputId, btn) {
     btn.textContent = isText ? '👁' : '🙈';
 }
 
-// Password strength meter
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        showToast('Waking up server… first load may take 30s ⏳', 'info', 8000);
+    }
+
     const pwInput = document.getElementById('signupPassword');
     if (pwInput) {
         pwInput.addEventListener('input', () => {
@@ -93,14 +101,17 @@ async function handleLogin(e) {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     const btn = document.getElementById('loginBtn');
-
     setAuthLoading(btn, true);
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 35000);
         const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         const data = await res.json();
         if (data.success) {
             currentUser = data.user;
@@ -109,8 +120,12 @@ async function handleLogin(e) {
         } else {
             showToast(data.message || 'Login failed', 'error');
         }
-    } catch {
-        showToast('Cannot reach server. Check backend is running.', 'error');
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            showToast('Server is waking up — please try again in a moment ⏳', 'error', 5000);
+        } else {
+            showToast('Cannot reach server. Check your connection.', 'error');
+        }
     } finally {
         setAuthLoading(btn, false);
     }
@@ -123,14 +138,17 @@ async function handleSignup(e) {
     const email    = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
     const btn = document.getElementById('signupBtn');
-
     setAuthLoading(btn, true);
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 35000);
         const res = await fetch(`${BACKEND_URL}/api/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fullName, username, email, password }),
+            signal: controller.signal,
         });
+        clearTimeout(timeout);
         const data = await res.json();
         if (data.success) {
             currentUser = data.user;
@@ -139,8 +157,12 @@ async function handleSignup(e) {
         } else {
             showToast(data.message || 'Signup failed', 'error');
         }
-    } catch {
-        showToast('Cannot reach server. Check backend is running.', 'error');
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            showToast('Server is waking up — please try again in a moment ⏳', 'error', 5000);
+        } else {
+            showToast('Cannot reach server. Check your connection.', 'error');
+        }
     } finally {
         setAuthLoading(btn, false);
     }
@@ -161,47 +183,33 @@ function setAuthLoading(btn, loading) {
 function enterGame() {
     document.getElementById('authWrapper').classList.add('hidden');
     document.getElementById('mainContainer').classList.remove('hidden');
-    // Set nav user label
-    const label = currentUser.guest
-        ? '🕹 Guest'
-        : `👤 ${currentUser.username}`;
+    const label = currentUser.guest ? '🕹 Guest' : `👤 ${currentUser.username}`;
     document.getElementById('navUser').textContent = label;
-    // Pre-fill player name on game over screen
     document.getElementById('playerName').value = currentUser.username || '';
-    // Show personal best on splash if logged in
     if (!currentUser.guest) loadSplashStats();
 }
 
 function logout() {
-    currentUser = null;
-    selectedTheme = null;
-    selectedDiff  = null;
+    currentUser = null; selectedTheme = null; selectedDiff = null;
     clearIntervals();
     document.getElementById('mainContainer').classList.add('hidden');
     document.getElementById('authWrapper').classList.remove('hidden');
     document.getElementById('leaderboardPanel').classList.remove('visible');
     showScreen('splashScreen');
-    // Reset forms
     document.getElementById('loginForm').reset();
     document.getElementById('signupForm').reset();
     switchAuthTab('login');
 }
 
-// ════════════════════════════════════════════════════
-//  SPLASH STATS
-// ════════════════════════════════════════════════════
 async function loadSplashStats() {
     try {
         const res = await fetch(`${BACKEND_URL}/api/leaderboard`);
         if (!res.ok) return;
         const scores = await res.json();
         const container = document.getElementById('splashStats');
-        // Find personal best
         const myBest = scores.find(s => s.playerName === currentUser.username);
         const html = [];
-        if (myBest) {
-            html.push(`<div class="splash-stat"><div class="splash-stat-val">${myBest.score}</div><div class="splash-stat-lbl">Your Best</div></div>`);
-        }
+        if (myBest) html.push(`<div class="splash-stat"><div class="splash-stat-val">${myBest.score}</div><div class="splash-stat-lbl">Your Best</div></div>`);
         if (scores.length > 0) {
             html.push(`<div class="splash-stat"><div class="splash-stat-val">${scores[0].score}</div><div class="splash-stat-lbl">Top Score</div></div>`);
             html.push(`<div class="splash-stat"><div class="splash-stat-val">${scores.length}</div><div class="splash-stat-lbl">Players</div></div>`);
@@ -210,9 +218,6 @@ async function loadSplashStats() {
     } catch { /* silent */ }
 }
 
-// ════════════════════════════════════════════════════
-//  SCREEN NAVIGATION
-// ════════════════════════════════════════════════════
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
@@ -224,9 +229,6 @@ function showDifficultySelection() {
     showScreen('difficultyScreen');
 }
 
-// ════════════════════════════════════════════════════
-//  THEME & DIFFICULTY
-// ════════════════════════════════════════════════════
 function selectTheme(theme, el) {
     selectedTheme = theme;
     document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
@@ -241,31 +243,24 @@ function selectDifficulty(diff, el) {
     document.getElementById('difficultyNextBtn').disabled = false;
 }
 
-// ════════════════════════════════════════════════════
-//  GAME LOGIC
-// ════════════════════════════════════════════════════
 function startGame() {
     if (!selectedTheme || !selectedDiff) { showToast('Select theme and difficulty!', 'error'); return; }
-
     score = 0; hitCount = 0; timeLeft = 45; targets = [];
     document.getElementById('score').textContent    = '0';
     document.getElementById('hitCount').textContent = '0';
     document.getElementById('timer').textContent    = '45';
     document.getElementById('timer').closest('.stat-card').classList.remove('urgent');
-
     buildBoard();
     showScreen('gameScreen');
     document.getElementById('leaderboardPanel').classList.add('visible');
     loadLeaderboard();
     lbInterval = setInterval(loadLeaderboard, 10000);
-
     gameInterval = setInterval(() => {
         timeLeft--;
         document.getElementById('timer').textContent = timeLeft;
         if (timeLeft <= 10) document.getElementById('timer').closest('.stat-card').classList.add('urgent');
         if (timeLeft <= 0) endGame();
     }, 1000);
-
     const cfg = DIFFICULTY[selectedDiff];
     spawnInterval = setInterval(spawnTarget, cfg.spawnRate);
     spawnTarget();
@@ -290,19 +285,16 @@ function spawnTarget() {
     const count     = Math.random() < 0.65 ? 1 : 2;
     const occupied  = targets.map(t => t.index);
     const available = [0,1,2,3,4,5,6,7,8].filter(i => !occupied.includes(i));
-
     for (let i = 0; i < count && available.length > 0; i++) {
-        const ri    = Math.floor(Math.random() * available.length);
-        const idx   = available.splice(ri, 1)[0];
-        const isOk  = Math.random() < 0.7;
+        const ri   = Math.floor(Math.random() * available.length);
+        const idx  = available.splice(ri, 1)[0];
+        const isOk = Math.random() < 0.7;
         const theme = THEMES[selectedTheme];
-        const t     = { index: idx, isCorrect: isOk, timeoutId: null };
+        const t = { index: idx, isCorrect: isOk, timeoutId: null };
         targets.push(t);
-
         const hole = holeAt(idx);
         hole.querySelector('.hole-emoji').textContent = isOk ? theme.correct : theme.wrong;
         hole.classList.add(isOk ? 'active-correct' : 'active-wrong');
-
         t.timeoutId = setTimeout(() => removeTarget(idx), DIFFICULTY[selectedDiff].targetTime);
     }
 }
@@ -321,10 +313,9 @@ function removeTarget(idx) {
 function hitTarget(idx) {
     const ti = targets.findIndex(t => t.index === idx);
     if (ti === -1) return;
-    const t    = targets[ti];
+    const t = targets[ti];
     const hole = holeAt(idx);
     clearTimeout(t.timeoutId);
-
     if (t.isCorrect) {
         score += 10; hitCount++;
         hole.classList.add('hit-correct');
@@ -334,7 +325,6 @@ function hitTarget(idx) {
         hole.classList.add('hit-wrong');
         showPopup(idx, '−10', '#f56565');
     }
-
     document.getElementById('score').textContent    = score;
     document.getElementById('hitCount').textContent = hitCount;
     hole.querySelector('.hole-emoji').textContent = '';
@@ -345,12 +335,10 @@ function hitTarget(idx) {
 
 function showPopup(idx, text, color) {
     const hole = holeAt(idx);
-    const el   = document.createElement('div');
+    const el = document.createElement('div');
     el.className = 'score-popup';
     el.textContent = text;
-    el.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-        font-size:1.8rem;font-weight:900;color:${color};pointer-events:none;z-index:10;
-        animation:scorePopup 0.9s ease forwards;text-shadow:0 2px 8px rgba(0,0,0,0.5);`;
+    el.style.cssText = `position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;font-weight:900;color:${color};pointer-events:none;z-index:10;animation:scorePopup 0.9s ease forwards;text-shadow:0 2px 8px rgba(0,0,0,0.5);`;
     hole.appendChild(el);
     setTimeout(() => el.remove(), 900);
 }
@@ -359,19 +347,14 @@ function endGame() {
     clearIntervals();
     targets.forEach(t => removeTarget(t.index));
     targets = [];
-
     document.getElementById('finalScore').textContent = score;
-    document.getElementById('scoreMeta').textContent  =
-        `${hitCount} hits · ${selectedTheme} · ${selectedDiff}`;
-
-    // Pre-fill name
+    document.getElementById('scoreMeta').textContent  = `${hitCount} hits · ${selectedTheme} · ${selectedDiff}`;
     if (currentUser && !currentUser.guest) {
         document.getElementById('playerName').value = currentUser.username;
         document.getElementById('nameInputGroup').style.display = 'none';
     } else {
         document.getElementById('nameInputGroup').style.display = 'block';
     }
-
     showScreen('gameOverScreen');
 }
 
@@ -381,9 +364,6 @@ function clearIntervals() {
     clearInterval(lbInterval);
 }
 
-// ════════════════════════════════════════════════════
-//  SAVE SCORE
-// ════════════════════════════════════════════════════
 async function saveScore() {
     let playerName;
     if (currentUser && !currentUser.guest) {
@@ -392,17 +372,10 @@ async function saveScore() {
         playerName = document.getElementById('playerName').value.trim();
         if (!playerName) { showToast('Enter your name to save!', 'error'); return; }
     }
-
     try {
-        const body = {
-            playerName,
-            score,
-            theme: selectedTheme,
-            difficulty: selectedDiff,
-        };
+        const body = { playerName, score, theme: selectedTheme, difficulty: selectedDiff };
         if (currentUser && currentUser.id) body.userId = currentUser.id;
-
-        const res  = await fetch(`${BACKEND_URL}/api/scores`, {
+        const res = await fetch(`${BACKEND_URL}/api/scores`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
@@ -423,9 +396,6 @@ async function saveScore() {
     }
 }
 
-// ════════════════════════════════════════════════════
-//  PLAY AGAIN
-// ════════════════════════════════════════════════════
 function playAgain() {
     selectedTheme = null; selectedDiff = null;
     document.getElementById('scoreMessage').className = 'score-message';
@@ -438,9 +408,6 @@ function playAgain() {
     if (currentUser && !currentUser.guest) loadSplashStats();
 }
 
-// ════════════════════════════════════════════════════
-//  LEADERBOARD
-// ════════════════════════════════════════════════════
 async function loadLeaderboard() {
     try {
         const res = await fetch(`${BACKEND_URL}/api/leaderboard`);
@@ -469,9 +436,6 @@ function escHtml(str) {
     return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ════════════════════════════════════════════════════
-//  FIREWORKS
-// ════════════════════════════════════════════════════
 function triggerFireworks() {
     const colors = ['#ff4757','#2ed573','#1e90ff','#ffa502','#ff6b81','#00ffcc'];
     for (let i = 0; i < 60; i++) {
@@ -492,7 +456,7 @@ function createFirework(x, y, color) {
         p.style.top  = y + 'px';
         p.style.background = color;
         const angle = (Math.PI * 2 * i) / n;
-        const v     = 55 + Math.random() * 55;
+        const v = 55 + Math.random() * 55;
         p.style.setProperty('--tx', Math.cos(angle) * v + 'px');
         p.style.setProperty('--ty', Math.sin(angle) * v + 'px');
         document.getElementById('fireworksContainer').appendChild(p);
@@ -500,39 +464,19 @@ function createFirework(x, y, color) {
     }
 }
 
-// ════════════════════════════════════════════════════
-//  PARTICLES (background)
-// ════════════════════════════════════════════════════
 function generateParticles() {
     const container = document.getElementById('particles');
     for (let i = 0; i < 18; i++) {
         const dot = document.createElement('div');
         const size = 2 + Math.random() * 3;
-        dot.style.cssText = `
-            position:absolute;
-            width:${size}px;height:${size}px;
-            border-radius:50%;
-            background:rgba(0,255,204,${0.05 + Math.random() * 0.1});
-            left:${Math.random() * 100}%;
-            top:${Math.random() * 100}%;
-            animation:floatDot ${8 + Math.random() * 12}s ease-in-out infinite;
-            animation-delay:${Math.random() * 8}s;
-        `;
+        dot.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:rgba(0,255,204,${0.05 + Math.random() * 0.1});left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation:floatDot ${8 + Math.random() * 12}s ease-in-out infinite;animation-delay:${Math.random() * 8}s;`;
         container.appendChild(dot);
     }
-    // inject keyframe
     const style = document.createElement('style');
-    style.textContent = `@keyframes floatDot {
-        0%,100%{transform:translateY(0) translateX(0);}
-        33%{transform:translateY(-30px) translateX(15px);}
-        66%{transform:translateY(20px) translateX(-10px);}
-    }`;
+    style.textContent = `@keyframes floatDot{0%,100%{transform:translateY(0) translateX(0);}33%{transform:translateY(-30px) translateX(15px);}66%{transform:translateY(20px) translateX(-10px);}}`;
     document.head.appendChild(style);
 }
 
-// ════════════════════════════════════════════════════
-//  HELPERS
-// ════════════════════════════════════════════════════
 function holeAt(idx) {
     return document.querySelector(`.hole[data-index="${idx}"]`);
 }
