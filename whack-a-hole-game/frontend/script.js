@@ -1,17 +1,14 @@
 /* =====================================================
-   Whack-a-Mole — Enhanced Edition
+   Mole Mayhem — Enhanced Edition
    script.js
    ===================================================== */
 
 // ── Backend URL ──────────────────────────────────────────────────────────────
-// localhost = local dev, anything else (Netlify, Capacitor app) = Render
 const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:8080'
     : 'https://whack-a-hole-game.onrender.com';
 
 // ── Server warm-up ───────────────────────────────────────────────────────────
-// Render free tier sleeps after 15 min. This pings /api/health immediately on
-// page load and shows a live progress bar so users know what's happening.
 let serverReady = false;
 
 function updateStatus(title, sub, pct, done = false) {
@@ -25,7 +22,6 @@ function updateStatus(title, sub, pct, done = false) {
     if (bar) bar.style.width = pct + '%';
     if (done) {
         el.classList.add('ready');
-        // hide the banner after 2s once ready
         setTimeout(() => el.classList.add('hidden'), 2000);
     }
 }
@@ -33,7 +29,6 @@ function updateStatus(title, sub, pct, done = false) {
 async function warmUpServer() {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocal) {
-        // Local dev — skip the banner entirely
         document.getElementById('serverStatus')?.classList.add('hidden');
         serverReady = true;
         return;
@@ -41,7 +36,6 @@ async function warmUpServer() {
 
     updateStatus('Connecting to server…', 'Waking up — this takes up to 30s on first visit', 5);
 
-    // Animate the bar while waiting so it doesn't look frozen
     const steps = [
         { delay: 2000,  pct: 15, sub: 'Starting backend…' },
         { delay: 5000,  pct: 30, sub: 'Loading database connection…' },
@@ -57,8 +51,7 @@ async function warmUpServer() {
     );
 
     const start = Date.now();
-    let attempts = 0;
-    while (Date.now() - start < 55000) {          // try for up to 55s
+    while (Date.now() - start < 55000) {
         try {
             const res = await fetch(`${BACKEND_URL}/api/health`, {
                 method: 'GET',
@@ -67,21 +60,18 @@ async function warmUpServer() {
             if (res.ok) {
                 timers.forEach(clearTimeout);
                 serverReady = true;
-                updateStatus('✅ Server ready!', 'You can sign up or log in now', 100, true);
+                updateStatus('✅ Mole Mayhem API ready!', 'You can sign up or log in now', 100, true);
                 return;
             }
         } catch { /* keep retrying */ }
-        attempts++;
-        await new Promise(r => setTimeout(r, 3000));  // wait 3s between retries
+        await new Promise(r => setTimeout(r, 3000));
     }
 
-    // Timed out — still let them try, just warn
     timers.forEach(clearTimeout);
     updateStatus('⚠️ Server slow to respond', 'Try signing up anyway — it may still work', 90);
     serverReady = true;
 }
 
-// Start warm-up immediately when script loads
 warmUpServer();
 
 // ── Themes ──────────────────────────────────────────
@@ -100,17 +90,78 @@ const DIFFICULTY = {
     hard:   { targetTime: 2000, spawnRate: 1500 },
 };
 
-// ── State ────────────────────────────────────────────
-let currentUser   = null;   // { id, username, fullName } or { guest: true, username }
+// ── Core State ───────────────────────────────────────
+let currentUser   = null;
 let selectedTheme = null;
 let selectedDiff  = null;
 let score         = 0;
 let hitCount      = 0;
+let missCount     = 0;
 let timeLeft      = 45;
 let gameInterval  = null;
 let spawnInterval = null;
 let lbInterval    = null;
-let targets       = [];     // active holes
+let targets       = [];
+
+// ── New State Variables ──────────────────────────────
+let comboCount        = 0;
+let bestCombo         = 0;
+let wrongClickCount   = 0;
+let hardPenaltyActive = false;
+let isPaused          = false;
+let totalGamesPlayed  = 0;
+let totalHitsAllTime  = 0;
+let totalMissesAllTime = 0;
+let localBestScore    = 0;
+let globalBestCombo   = 0;
+
+// Progressive difficulty tracking
+let elapsedSeconds         = 0;
+let currentSpawnRate       = 0;
+let progressiveSpawnHandle = null;
+
+// Achievements unlocked this session (by key)
+let gameAchievementsEarned = [];
+
+// ── Achievement Definitions ───────────────────────────
+const ACHIEVEMENTS = {
+    firstHit:        { key: 'firstHit',       icon: '🎯', title: 'First Hit',        desc: 'Score any points in your first game' },
+    moleHunter:      { key: 'moleHunter',     icon: '🔨', title: 'Mole Hunter',      desc: 'Get 10+ correct hits in one game' },
+    comboMaster:     { key: 'comboMaster',    icon: '⚡', title: 'Combo Master',     desc: 'Achieve a combo of 5 or more' },
+    precisionExpert: { key: 'precisionExpert',icon: '🎖', title: 'Precision Expert', desc: 'Finish with 90%+ accuracy (min 10 hits)' },
+    speedDemon:      { key: 'speedDemon',     icon: '💨', title: 'Speed Demon',      desc: '15+ correct hits in Hard mode' },
+    mayhemKing:      { key: 'mayhemKing',     icon: '👑', title: 'Mayhem King',      desc: 'Score 150+ points in one game' },
+};
+
+// ── Load persisted stats from localStorage ────────────
+function loadLocalStats() {
+    totalGamesPlayed   = parseInt(localStorage.getItem('mm_gamesPlayed')   || '0', 10);
+    totalHitsAllTime   = parseInt(localStorage.getItem('mm_totalHits')     || '0', 10);
+    totalMissesAllTime = parseInt(localStorage.getItem('mm_totalMisses')   || '0', 10);
+    localBestScore     = parseInt(localStorage.getItem('mm_bestScore')     || '0', 10);
+    globalBestCombo    = parseInt(localStorage.getItem('mm_bestCombo')     || '0', 10);
+}
+
+function saveLocalStats() {
+    localStorage.setItem('mm_gamesPlayed', totalGamesPlayed);
+    localStorage.setItem('mm_totalHits',   totalHitsAllTime);
+    localStorage.setItem('mm_totalMisses', totalMissesAllTime);
+    localStorage.setItem('mm_bestScore',   localBestScore);
+    localStorage.setItem('mm_bestCombo',   globalBestCombo);
+}
+
+function getUnlockedAchievements() {
+    try { return JSON.parse(localStorage.getItem('mm_achievements') || '[]'); }
+    catch { return []; }
+}
+
+function saveUnlockedAchievement(key) {
+    const unlocked = getUnlockedAchievements();
+    if (!unlocked.includes(key)) {
+        unlocked.push(key);
+        localStorage.setItem('mm_achievements', JSON.stringify(unlocked));
+    }
+}
 
 // ════════════════════════════════════════════════════
 //  TOAST
@@ -121,6 +172,34 @@ function showToast(msg, type = 'info', duration = 3000) {
     t.className = `toast ${type} show`;
     clearTimeout(t._timer);
     t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ════════════════════════════════════════════════════
+//  ACHIEVEMENT TOAST
+// ════════════════════════════════════════════════════
+function showAchievementToast(achievement) {
+    const el    = document.getElementById('achievementToast');
+    const icon  = document.getElementById('achievementToastIcon');
+    const title = document.getElementById('achievementToastTitle');
+    const desc  = document.getElementById('achievementToastDesc');
+    if (!el) return;
+    icon.textContent  = achievement.icon;
+    title.textContent = '🏆 Achievement Unlocked!';
+    desc.textContent  = `${achievement.title} — ${achievement.desc}`;
+    el.classList.add('show');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ════════════════════════════════════════════════════
+//  HARD MODE PENALTY ALERT
+// ════════════════════════════════════════════════════
+function showHardPenaltyAlert() {
+    const el = document.getElementById('hardPenaltyAlert');
+    if (!el) return;
+    el.classList.add('show');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 // ════════════════════════════════════════════════════
@@ -141,6 +220,8 @@ function togglePassword(inputId, btn) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadLocalStats();
+
     const pwInput = document.getElementById('signupPassword');
     if (pwInput) {
         pwInput.addEventListener('input', () => {
@@ -260,14 +341,9 @@ function setAuthLoading(btn, loading) {
 function enterGame() {
     document.getElementById('authWrapper').classList.add('hidden');
     document.getElementById('mainContainer').classList.remove('hidden');
-    // Set nav user label
-    const label = currentUser.guest
-        ? '🕹 Guest'
-        : `👤 ${currentUser.username}`;
+    const label = currentUser.guest ? '🕹 Guest' : `👤 ${currentUser.username}`;
     document.getElementById('navUser').textContent = label;
-    // Pre-fill player name on game over screen
     document.getElementById('playerName').value = currentUser.username || '';
-    // Show personal best on splash if logged in
     if (!currentUser.guest) loadSplashStats();
 }
 
@@ -280,7 +356,6 @@ function logout() {
     document.getElementById('authWrapper').classList.remove('hidden');
     document.getElementById('leaderboardPanel').classList.remove('visible');
     showScreen('splashScreen');
-    // Reset forms
     document.getElementById('loginForm').reset();
     document.getElementById('signupForm').reset();
     switchAuthTab('login');
@@ -295,7 +370,6 @@ async function loadSplashStats() {
         if (!res.ok) return;
         const scores = await res.json();
         const container = document.getElementById('splashStats');
-        // Find personal best
         const myBest = scores.find(s => s.playerName === currentUser.username);
         const html = [];
         if (myBest) {
@@ -304,6 +378,9 @@ async function loadSplashStats() {
         if (scores.length > 0) {
             html.push(`<div class="splash-stat"><div class="splash-stat-val">${scores[0].score}</div><div class="splash-stat-lbl">Top Score</div></div>`);
             html.push(`<div class="splash-stat"><div class="splash-stat-val">${scores.length}</div><div class="splash-stat-lbl">Players</div></div>`);
+        }
+        if (localBestScore > 0) {
+            html.push(`<div class="splash-stat"><div class="splash-stat-val">${localBestScore}</div><div class="splash-stat-lbl">Local Best</div></div>`);
         }
         container.innerHTML = html.join('');
     } catch { /* silent */ }
@@ -316,10 +393,13 @@ function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
 }
-function showSplash()            { showScreen('splashScreen'); }
-function showThemeSelection()    { showScreen('themeScreen'); }
+function showSplash()         { showScreen('splashScreen'); }
+function showThemeSelection() { showScreen('themeScreen'); }
 function showDifficultySelection() {
     if (!selectedTheme) { showToast('Pick a theme first!', 'error'); return; }
+    // Show/hide hard mode rules based on current selection
+    const hardRules = document.getElementById('hardModeRules');
+    if (hardRules) hardRules.style.display = selectedDiff === 'hard' ? 'block' : 'none';
     showScreen('difficultyScreen');
 }
 
@@ -338,6 +418,70 @@ function selectDifficulty(diff, el) {
     document.querySelectorAll('.difficulty-card').forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     document.getElementById('difficultyNextBtn').disabled = false;
+
+    // Show hard mode rules inline when hard is selected
+    const hardRules = document.getElementById('hardModeRules');
+    if (hardRules) hardRules.style.display = diff === 'hard' ? 'block' : 'none';
+}
+
+// ════════════════════════════════════════════════════
+//  STATS MODAL
+// ════════════════════════════════════════════════════
+function showStats() {
+    loadLocalStats();
+    const accuracy = (totalHitsAllTime + totalMissesAllTime) > 0
+        ? Math.round((totalHitsAllTime / (totalHitsAllTime + totalMissesAllTime)) * 100)
+        : 0;
+    document.getElementById('statsGamesPlayed').textContent = totalGamesPlayed;
+    document.getElementById('statsTotalHits').textContent   = totalHitsAllTime;
+    document.getElementById('statsAccuracy').textContent    = accuracy + '%';
+    document.getElementById('statsBestCombo').textContent   = globalBestCombo;
+    document.getElementById('statsBestScore').textContent   = localBestScore;
+    document.getElementById('statsModal').classList.remove('hidden');
+}
+
+function closeStats(event) {
+    // Close if clicking overlay background or the X button
+    if (!event || event.target === document.getElementById('statsModal') || event.currentTarget === event.target) {
+        document.getElementById('statsModal').classList.add('hidden');
+    }
+}
+
+// ════════════════════════════════════════════════════
+//  PAUSE / RESUME
+// ════════════════════════════════════════════════════
+function pauseGame() {
+    if (isPaused) return;
+    isPaused = true;
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    clearInterval(progressiveSpawnHandle);
+    document.getElementById('pauseOverlay').classList.remove('hidden');
+}
+
+function resumeGame() {
+    if (!isPaused) return;
+    isPaused = false;
+    document.getElementById('pauseOverlay').classList.add('hidden');
+
+    gameInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+        if (timeLeft <= 10) document.getElementById('timer').closest('.stat-card').classList.add('urgent');
+        if (timeLeft <= 0) endGame();
+        elapsedSeconds++;
+        checkProgressiveDifficulty();
+    }, 1000);
+
+    spawnInterval = setInterval(spawnTarget, currentSpawnRate);
+}
+
+function restartGame() {
+    document.getElementById('pauseOverlay').classList.add('hidden');
+    clearIntervals();
+    targets.forEach(t => clearTimeout(t.timeoutId));
+    targets = [];
+    playAgain();
 }
 
 // ════════════════════════════════════════════════════
@@ -346,11 +490,32 @@ function selectDifficulty(diff, el) {
 function startGame() {
     if (!selectedTheme || !selectedDiff) { showToast('Select theme and difficulty!', 'error'); return; }
 
-    score = 0; hitCount = 0; timeLeft = 45; targets = [];
+    // Reset all state
+    score         = 0;
+    hitCount      = 0;
+    missCount     = 0;
+    timeLeft      = 45;
+    targets       = [];
+    comboCount    = 0;
+    bestCombo     = 0;
+    wrongClickCount   = 0;
+    hardPenaltyActive = false;
+    isPaused          = false;
+    elapsedSeconds    = 0;
+    gameAchievementsEarned = [];
+
+    const cfg = DIFFICULTY[selectedDiff];
+    currentSpawnRate = cfg.spawnRate;
+
     document.getElementById('score').textContent    = '0';
     document.getElementById('hitCount').textContent = '0';
     document.getElementById('timer').textContent    = '45';
+    document.getElementById('comboCount').textContent = '0';
     document.getElementById('timer').closest('.stat-card').classList.remove('urgent');
+
+    // Show hard mode badge
+    const badge = document.getElementById('hardModeBadge');
+    if (badge) badge.classList.toggle('hidden', selectedDiff !== 'hard');
 
     buildBoard();
     showScreen('gameScreen');
@@ -360,14 +525,29 @@ function startGame() {
 
     gameInterval = setInterval(() => {
         timeLeft--;
+        elapsedSeconds++;
         document.getElementById('timer').textContent = timeLeft;
         if (timeLeft <= 10) document.getElementById('timer').closest('.stat-card').classList.add('urgent');
         if (timeLeft <= 0) endGame();
+        checkProgressiveDifficulty();
     }, 1000);
 
-    const cfg = DIFFICULTY[selectedDiff];
-    spawnInterval = setInterval(spawnTarget, cfg.spawnRate);
+    spawnInterval = setInterval(spawnTarget, currentSpawnRate);
     spawnTarget();
+}
+
+function checkProgressiveDifficulty() {
+    // Every 10 seconds, reduce spawn interval by 150ms (min 800ms)
+    if (elapsedSeconds > 0 && elapsedSeconds % 10 === 0) {
+        const newRate = Math.max(800, currentSpawnRate - 150);
+        if (newRate !== currentSpawnRate) {
+            currentSpawnRate = newRate;
+            clearInterval(spawnInterval);
+            clearInterval(progressiveSpawnHandle);
+            spawnInterval = setInterval(spawnTarget, currentSpawnRate);
+            progressiveSpawnHandle = spawnInterval;
+        }
+    }
 }
 
 function buildBoard() {
@@ -391,29 +571,38 @@ function spawnTarget() {
     const available = [0,1,2,3,4,5,6,7,8].filter(i => !occupied.includes(i));
 
     for (let i = 0; i < count && available.length > 0; i++) {
-        const ri    = Math.floor(Math.random() * available.length);
-        const idx   = available.splice(ri, 1)[0];
-        const isOk  = Math.random() < 0.7;
+        const ri   = Math.floor(Math.random() * available.length);
+        const idx  = available.splice(ri, 1)[0];
+        const isOk = Math.random() < 0.7;
         const theme = THEMES[selectedTheme];
-        const t     = { index: idx, isCorrect: isOk, timeoutId: null };
+        const t = { index: idx, isCorrect: isOk, timeoutId: null };
         targets.push(t);
 
         const hole = holeAt(idx);
         hole.querySelector('.hole-emoji').textContent = isOk ? theme.correct : theme.wrong;
         hole.classList.add(isOk ? 'active-correct' : 'active-wrong');
 
-        t.timeoutId = setTimeout(() => removeTarget(idx), DIFFICULTY[selectedDiff].targetTime);
+        t.timeoutId = setTimeout(() => {
+            if (t.isCorrect) missCount++; // missed a correct target
+            removeTarget(idx, true);
+        }, DIFFICULTY[selectedDiff].targetTime);
     }
 }
 
-function removeTarget(idx) {
+function removeTarget(idx, isMiss = false) {
     const i = targets.findIndex(t => t.index === idx);
     if (i === -1) return;
+    const t = targets[i];
     targets.splice(i, 1);
     const hole = holeAt(idx);
     if (hole) {
         hole.querySelector('.hole-emoji').textContent = '';
         hole.classList.remove('active-correct', 'active-wrong');
+    }
+    // If a correct target expires without being hit — reset combo
+    if (isMiss && t && t.isCorrect) {
+        comboCount = 0;
+        updateComboDisplay();
     }
 }
 
@@ -425,13 +614,59 @@ function hitTarget(idx) {
     clearTimeout(t.timeoutId);
 
     if (t.isCorrect) {
-        score += 10; hitCount++;
+        // ── Correct hit ──
+        let points = 10;
+
+        // Increment combo
+        comboCount++;
+        if (comboCount > bestCombo) bestCombo = comboCount;
+
+        // Combo bonus points
+        if (comboCount >= 10) {
+            points += 20;
+        } else if (comboCount >= 5) {
+            points += 10;
+        } else if (comboCount >= 3) {
+            points += 5;
+        }
+
+        score += points;
+        hitCount++;
         hole.classList.add('hit-correct');
-        showPopup(idx, '+10', '#48bb78');
+        showPopup(idx, `+${points}`, '#48bb78');
+
+        // Show combo popup for combos >= 3
+        if (comboCount === 10) {
+            showComboPopup(idx, '💥 x10 COMBO +20!');
+        } else if (comboCount === 5) {
+            showComboPopup(idx, '⚡ x5 COMBO +10!');
+        } else if (comboCount === 3) {
+            showComboPopup(idx, '🔥 x3 COMBO +5!');
+        } else if (comboCount > 10 && comboCount % 5 === 0) {
+            showComboPopup(idx, `💥 x${comboCount} COMBO!`);
+        }
+
+        updateComboDisplay();
     } else {
-        score -= 10;
+        // ── Wrong hit ──
+        let deduct = 10;
+        if (selectedDiff === 'hard') {
+            wrongClickCount++;
+            if (wrongClickCount >= 3) {
+                deduct = 15;
+                if (!hardPenaltyActive) {
+                    hardPenaltyActive = true;
+                    showHardPenaltyAlert();
+                }
+            }
+        }
+        score -= deduct;
         hole.classList.add('hit-wrong');
-        showPopup(idx, '−10', '#f56565');
+        showPopup(idx, `−${deduct}`, '#f56565');
+
+        // Reset combo on wrong hit
+        comboCount = 0;
+        updateComboDisplay();
     }
 
     document.getElementById('score').textContent    = score;
@@ -440,6 +675,19 @@ function hitTarget(idx) {
     hole.classList.remove('active-correct', 'active-wrong');
     targets.splice(ti, 1);
     setTimeout(() => hole.classList.remove('hit-correct', 'hit-wrong'), 500);
+}
+
+function updateComboDisplay() {
+    const countEl = document.getElementById('comboCount');
+    const card    = document.getElementById('comboCard');
+    if (countEl) countEl.textContent = comboCount;
+    if (card) {
+        if (comboCount >= 3) {
+            card.classList.add('combo-active');
+        } else {
+            card.classList.remove('combo-active');
+        }
+    }
 }
 
 function showPopup(idx, text, color) {
@@ -454,14 +702,99 @@ function showPopup(idx, text, color) {
     setTimeout(() => el.remove(), 900);
 }
 
+function showComboPopup(idx, text) {
+    const hole = holeAt(idx);
+    const el   = document.createElement('div');
+    el.className = 'combo-popup';
+    el.textContent = text;
+    hole.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+}
+
+// ════════════════════════════════════════════════════
+//  ACHIEVEMENTS
+// ════════════════════════════════════════════════════
+function checkAndAwardAchievements() {
+    const unlocked     = getUnlockedAchievements();
+    const newlyEarned  = [];
+    const totalAttempts = hitCount + missCount;
+    const accuracy      = totalAttempts > 0 ? (hitCount / totalAttempts) * 100 : 0;
+
+    function tryAward(key) {
+        if (!unlocked.includes(key)) {
+            saveUnlockedAchievement(key);
+            newlyEarned.push(key);
+            gameAchievementsEarned.push(key);
+        }
+    }
+
+    if (score > 0)                                                    tryAward('firstHit');
+    if (hitCount >= 10)                                               tryAward('moleHunter');
+    if (bestCombo >= 5)                                               tryAward('comboMaster');
+    if (accuracy >= 90 && totalAttempts >= 10)                        tryAward('precisionExpert');
+    if (selectedDiff === 'hard' && hitCount >= 15)                    tryAward('speedDemon');
+    if (score >= 150)                                                 tryAward('mayhemKing');
+
+    // Show toasts for new achievements (staggered)
+    newlyEarned.forEach((key, i) => {
+        setTimeout(() => showAchievementToast(ACHIEVEMENTS[key]), i * 4500);
+    });
+
+    return gameAchievementsEarned;
+}
+
+function renderAchievementBadges(keys) {
+    const container = document.getElementById('achievementBadges');
+    if (!container) return;
+    if (!keys || keys.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    container.innerHTML = keys.map(key => {
+        const a = ACHIEVEMENTS[key];
+        if (!a) return '';
+        return `<span class="achievement-badge">${a.icon} ${a.title}</span>`;
+    }).join('');
+}
+
+// ════════════════════════════════════════════════════
+//  END GAME
+// ════════════════════════════════════════════════════
 function endGame() {
     clearIntervals();
-    targets.forEach(t => removeTarget(t.index));
+    targets.forEach(t => {
+        clearTimeout(t.timeoutId);
+        removeTarget(t.index);
+    });
     targets = [];
 
-    document.getElementById('finalScore').textContent = score;
-    document.getElementById('scoreMeta').textContent  =
-        `${hitCount} hits · ${selectedTheme} · ${selectedDiff}`;
+    // Update global best combo
+    if (bestCombo > globalBestCombo) globalBestCombo = bestCombo;
+    if (score > localBestScore)       localBestScore  = score;
+
+    // Update all-time stats
+    totalGamesPlayed++;
+    totalHitsAllTime   += hitCount;
+    totalMissesAllTime += missCount;
+    saveLocalStats();
+
+    // Calculate accuracy
+    const totalAttempts = hitCount + missCount;
+    const accuracy = totalAttempts > 0
+        ? Math.round((hitCount / totalAttempts) * 100)
+        : 0;
+
+    // Check achievements
+    const earnedKeys = checkAndAwardAchievements();
+
+    // Update game over UI
+    document.getElementById('finalScore').textContent  = score;
+    document.getElementById('scoreMeta').textContent   =
+        `${hitCount} hits · ${accuracy}% accuracy · best combo: ${bestCombo} · ${selectedTheme} · ${selectedDiff}`;
+    document.getElementById('gameOverAccuracy').textContent  = accuracy + '%';
+    document.getElementById('gameOverBestCombo').textContent = bestCombo;
+
+    renderAchievementBadges(earnedKeys);
 
     // Pre-fill name
     if (currentUser && !currentUser.guest) {
@@ -478,6 +811,7 @@ function clearIntervals() {
     clearInterval(gameInterval);
     clearInterval(spawnInterval);
     clearInterval(lbInterval);
+    clearInterval(progressiveSpawnHandle);
 }
 
 // ════════════════════════════════════════════════════
@@ -533,6 +867,9 @@ function playAgain() {
     document.querySelectorAll('.theme-card, .difficulty-card').forEach(c => c.classList.remove('selected'));
     document.getElementById('themeNextBtn').disabled = true;
     document.getElementById('difficultyNextBtn').disabled = true;
+    // Reset hard mode rules panel
+    const hardRules = document.getElementById('hardModeRules');
+    if (hardRules) hardRules.style.display = 'none';
     showSplash();
     if (currentUser && !currentUser.guest) loadSplashStats();
 }
@@ -619,7 +956,6 @@ function generateParticles() {
         `;
         container.appendChild(dot);
     }
-    // inject keyframe
     const style = document.createElement('style');
     style.textContent = `@keyframes floatDot {
         0%,100%{transform:translateY(0) translateX(0);}

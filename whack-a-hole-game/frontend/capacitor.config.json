@@ -1,6 +1,6 @@
 {
   "appId": "com.jkv.whackamole",
-  "appName": "Whack A Mole",
+  "appName": "Mole Mayhem",
   "webDir": ".",
   "server": {
     "androidScheme": "https"

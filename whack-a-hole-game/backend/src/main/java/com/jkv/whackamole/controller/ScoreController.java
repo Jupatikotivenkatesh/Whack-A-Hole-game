@@ -72,7 +72,7 @@ public class ScoreController {
     public ResponseEntity<Map<String, String>> health() {
         Map<String, String> response = new HashMap<>();
         response.put("status", "UP");
-        response.put("message", "Whack-a-Mole API is running");
+        response.put("message", "Mole Mayhem API is running");
         return ResponseEntity.ok(response);
     }
 }

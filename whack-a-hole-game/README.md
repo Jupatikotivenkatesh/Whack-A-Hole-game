@@ -1,290 +1,268 @@
-# 🎯 Whack-a-Mole — Enhanced Edition
+# 🐹 Mole Mayhem
 
-> A fast-paced, reflex-testing browser game. Whack the right targets, dodge the wrong ones, and climb the leaderboard before the clock runs out.
+![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen?style=flat-square&logo=springboot)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=flat-square&logo=mysql)
+![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-yellow?style=flat-square&logo=javascript)
+![HTML5](https://img.shields.io/badge/HTML5-CSS3-orange?style=flat-square&logo=html5)
+![Netlify](https://img.shields.io/badge/Netlify-Deployed-teal?style=flat-square&logo=netlify)
+![Render](https://img.shields.io/badge/Render-Backend-purple?style=flat-square&logo=render)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
----
-
-## � Table of Contents
-
-- [About the Game](#-about-the-game)
-- [Getting Started](#-getting-started)
-- [Login & Account](#-login--account)
-- [How to Play](#-how-to-play)
-- [Themes](#-themes)
-- [Difficulty Levels](#-difficulty-levels)
-- [Scoring Rules](#-scoring-rules)
-- [Leaderboard](#-leaderboard)
-- [Tips & Strategy](#-tips--strategy)
-- [Project Structure](#-project-structure)
-- [API Reference](#-api-reference)
-- [Tech Stack](#-tech-stack)
-- [Run with Docker](#-run-with-docker)
+> **Whack Fast. Score Big.**
+> A fast-paced arcade reflex browser game with combo systems, hard mode penalties, achievements, and a global leaderboard.
 
 ---
 
-## 🕹 About the Game
+## 🔗 Live Demo
 
-Whack-a-Mole Enhanced Edition is a single-page browser game where targets randomly pop up on a 3×3 grid of holes. Your job is simple — hit the **correct** target as fast as possible and avoid the **wrong** ones. Every correct hit earns you points, every wrong hit costs you points, and you have exactly **45 seconds** to rack up the highest score you can.
-
-The game supports:
-- **5 unique visual themes**, each with its own correct and wrong target pair
-- **3 difficulty levels** that control how fast targets appear and disappear
-- **User accounts** with login, signup, and personal best tracking
-- **A live leaderboard** showing the top 10 scores across all players
+| Platform | URL |
+|---|---|
+| 🌐 Frontend (Netlify) | [Play Now](https://6a08391a4e797113d59cf528--lustrous-medovik-6f47cc.netlify.app/) |
+| ⚙️ Backend API (Render) | [API Health](https://whack-a-hole-game.onrender.com/api/health) |
 
 ---
 
-## 🚀 Getting Started
+## 📸 Screenshots
 
-### Prerequisites
-- Java 17+
-- Maven 3.8+
-- MySQL 8+
-- Any modern browser (Chrome, Firefox, Edge)
+> Screenshots are located in `docs/screenshots/`.
 
-### 1 — Start the backend
-
-```bash
-# Windows — set environment variables
-set SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/whackamole_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-set SPRING_DATASOURCE_USERNAME=root
-set SPRING_DATASOURCE_PASSWORD=yourpassword
-
-# Run the backend
-cd whack-a-hole-game/backend
-mvnw spring-boot:run
-```
-
-Backend starts at `http://localhost:8080`
-
-### 2 — Open the frontend
-
-**Option A** — Double-click `whack-a-hole-game/frontend/index.html` in File Explorer
-
-**Option B** — VS Code Live Server: right-click `index.html` → Open with Live Server
-
-**Option C** — Terminal:
-```bash
-npx serve whack-a-hole-game/frontend
-# then open http://localhost:3000
-```
-
-> ⚠️ Do not open the folder URL in a browser — always open `index.html` directly.
+| Splash Screen | Gameplay | Game Over |
+|---|---|---|
+| *(coming soon)* | *(coming soon)* | *(coming soon)* |
 
 ---
 
-## 🔐 Login & Account
+## ✨ Features
 
-When you open the game, you land on the **auth screen** before anything else. This is where you either create a new account or sign in to an existing one.
+### Core Gameplay
+- 3×3 grid arcade game — whack correct targets, avoid wrong ones
+- 45-second rounds with real-time score and hit counter
+- Up to 2 simultaneous targets per spawn
+- 5 visual themes, 3 difficulty levels
 
-### Creating a New Account (Sign Up)
+### Combo System
+- Combo counter tracks consecutive correct hits
+- Bonus points at combo milestones: x3 (+5 pts), x5 (+10 pts), x10 (+20 pts)
+- Gold combo popup animations and glowing stat card
+- Combo resets on any wrong hit or missed target
 
-Click the **Sign Up** tab and fill in:
+### Hard Mode Penalty System
+- First 2 wrong clicks: −10 pts each (standard)
+- 3rd wrong click onwards: −15 pts each (penalty mode)
+- Penalty alert banner slides in from top when activated
+- Wrong click counter resets each new game
 
-| Field | Description |
-|-------|-------------|
-| Full Name | Your display name (e.g. John Doe) |
-| Username | Unique game handle used to log in (e.g. johnd99) |
-| Email | Your email address |
-| Password | Minimum 6 characters — a strength meter guides you |
+### Achievement System
+6 unlockable achievements with toast notifications:
+- 🎯 **First Hit** — Score any points in your first game
+- 🔨 **Mole Hunter** — 10+ correct hits in one game
+- ⚡ **Combo Master** — Achieve a combo of 5 or more
+- 🎖 **Precision Expert** — 90%+ accuracy with min 10 hits
+- 💨 **Speed Demon** — 15+ correct hits in Hard mode
+- 👑 **Mayhem King** — Score 150+ points in one game
 
-Once submitted, your account is created and you're taken straight into the game.
+### Stats Dashboard
+Local stats tracked across all sessions:
+- Games played
+- Total hits
+- All-time accuracy
+- Best combo ever
+- Best score
 
-### Logging In to an Existing Account
+### Progressive Difficulty
+- Every 10 seconds, spawn rate increases automatically
+- Minimum rate cap at 800ms to keep the game playable
+- Works across all three starting difficulties
 
-Click the **Login** tab and enter:
+### Pause/Resume
+- Pause button in game header
+- Full-screen pause overlay
+- Resume continues exactly where you left off
+- Restart option resets to theme selection
 
-| Field | Description |
-|-------|-------------|
-| Username | The username you registered with |
-| Password | Your account password |
+### Auth System
+- Full account creation (full name, username, email, password)
+- Login with username/password
+- Guest mode (no account needed)
+- Password strength meter
+- Server warm-up banner for Render cold starts
 
-After a successful login, your username appears in the top navigation bar and your personal best score is shown on the lobby screen.
+### Leaderboard
+- Global top-10 leaderboard via backend API
+- Auto-refreshes every 10 seconds during gameplay
+- Rank medals for top 3 positions
+- Slide-in animation panel
 
-### Playing as a Guest
-
-If you don't want to create an account, click **Play as Guest**. You can play the full game and submit scores to the leaderboard using any display name — but scores won't be linked to a profile.
-
-### Logging Out
-
-Click the **🚪 Logout** button in the top-right corner at any time. You'll be returned to the login screen.
+### PWA-Ready
+- Web App Manifest (`manifest.json`)
+- `theme-color` meta tag
+- Standalone display mode
+- PWA-installable on mobile
 
 ---
 
-## � How to Play
-
-The game flows through five stages:
+## 🎮 How to Play
 
 ```
-Auth Screen → Theme Selection → Difficulty Selection → Game → Game Over
+Auth → Theme Selection → Difficulty Selection → Game → Game Over
 ```
 
-### Stage 1 — Auth
-Log in, sign up, or continue as guest (covered above).
+1. **Auth** — Log in, sign up, or continue as guest
+2. **Theme** — Choose one of 5 emoji themes (Classic, Forest, Space, Ocean, Candy)
+3. **Difficulty** — Easy (3s targets), Medium (2.5s), Hard (2s + penalty system)
+4. **Play** — Whack correct targets, build combos, avoid wrong ones
+5. **Game Over** — View accuracy + best combo, unlock achievements, save score
 
-### Stage 2 — Theme Selection
-Choose one of 5 themes. Each theme changes the emoji targets that appear on the board. Select a theme and click **Next →**.
+### Scoring
 
-### Stage 3 — Difficulty Selection
-Choose Easy, Medium, or Hard. This controls how long targets stay visible and how often new ones appear. Click **Start Game 🎮**.
+| Action | Points |
+|---|---|
+| Correct hit | +10 (base) |
+| x3 Combo bonus | +5 extra |
+| x5 Combo bonus | +10 extra |
+| x10 Combo bonus | +20 extra |
+| Wrong hit (normal) | −10 |
+| Wrong hit (hard, 3rd+) | −15 |
 
-### Stage 4 — Game
-- A **3×3 grid** of 9 holes appears
-- Targets randomly pop up in the holes
-- Click/tap a target to whack it
-- Up to **2 targets** can appear at the same time
-- The timer counts down from **45 seconds**
-- Your score and hit count update in real time
-- The timer card pulses red when ≤ 10 seconds remain
-- The leaderboard slides in on the right so you can track your position live
+---
 
-### Stage 5 — Game Over
-When the timer hits zero:
-- Your final score, total hits, theme, and difficulty are displayed
-- Logged-in users have their name pre-filled
-- Guests type a display name to save their score
-- Click **💾 Save Score** to submit to the leaderboard
-- Click **🔄 Play Again** to go back to theme selection
+## ⚡ Hard Mode Rules
+
+Hard mode adds a penalty escalation system:
+- Your first 2 wrong clicks cost **−10 pts** each (same as other difficulties)
+- Your 3rd wrong click activates **Hard Mode Penalty** — each wrong click now costs **−15 pts**
+- A penalty banner slides down from the top of the screen to warn you
+- The wrong-click counter and penalty status reset at the start of each new game
+
+---
+
+## 🏆 Achievement System
+
+Achievements are stored in `localStorage` and persist across sessions. When an achievement is unlocked for the first time, a purple toast notification slides in from the right.
+
+| Achievement | Requirement |
+|---|---|
+| 🎯 First Hit | Score any points |
+| 🔨 Mole Hunter | 10+ correct hits in one game |
+| ⚡ Combo Master | Achieve a combo of 5+ |
+| 🎖 Precision Expert | 90%+ accuracy (min 10 attempts) |
+| 💨 Speed Demon | 15+ correct hits on Hard difficulty |
+| 👑 Mayhem King | Score 150+ points in one game |
 
 ---
 
 ## 🎨 Themes
 
-Each theme is a complete visual skin for the game. The **correct target** earns you +10 points when hit. The **wrong target** costs you −10 points — they look similar, so stay sharp.
+| Theme | Correct Target | Wrong Target |
+|---|---|---|
+| 🐹 Classic | Mole | Mouse |
+| 🦝 Forest | Raccoon | Squirrel |
+| 👽 Space | Alien | Space Invader |
+| 🐙 Ocean | Octopus | Squid |
+| 🍭 Candy | Lollipop | Hard Candy |
 
 ---
 
-### 🐹 Classic
-The original Whack-a-Mole experience. A friendly brown mole pops up from the holes and you need to whack it before it disappears. Watch out for the sneaky mouse that looks almost identical — hitting it will cost you points.
+## 🛠 Tech Stack
 
-| | Target |
-|--|--------|
-| ✅ Correct | 🐹 Mole |
-| ❌ Wrong | 🐭 Mouse |
-
----
-
-### 🦝 Forest
-Set in a woodland environment, this theme brings forest creatures to life. A raccoon is your target — but squirrels are also scurrying around the holes trying to trick you. Quick eyes and steady clicks are key here.
-
-| | Target |
-|--|--------|
-| ✅ Correct | 🦝 Raccoon |
-| ❌ Wrong | 🐿️ Squirrel |
+| Layer | Technology | Details |
+|---|---|---|
+| Frontend | HTML5 + CSS3 + Vanilla JS | Single-page app, no framework |
+| Fonts | Orbitron + Inter | Google Fonts |
+| Backend | Java 17 + Spring Boot 3.2 | REST API |
+| ORM | Spring Data JPA | Hibernate |
+| Database | MySQL 8 | Hosted on Railway / local |
+| Build | Maven 3.8 | `mvnw` wrapper included |
+| Frontend Deploy | Netlify | Static hosting |
+| Backend Deploy | Render | Free-tier Java service |
+| Containerization | Docker + Compose | Optional local stack |
+| Mobile | Capacitor | PWA wrapper config |
 
 ---
 
-### 👽 Space
-An alien invasion has begun and you're the last line of defence. Whack the aliens before they escape, but don't hit the space invaders — they're on your side. This theme has the most visually similar pair, making it the trickiest to distinguish under pressure.
+## 🚀 Local Development
 
-| | Target |
-|--|--------|
-| ✅ Correct | 👽 Alien |
-| ❌ Wrong | 👾 Space Invader |
+### Prerequisites
+- Java 17+
+- Maven 3.8+
+- MySQL 8+
+- Modern browser
 
----
+### 1 — Start the backend
 
-### 🐙 Ocean
-Dive into the deep sea and take on the ocean's most elusive creatures. Octopuses are your targets — they're slippery and fast. Squids look almost the same but hitting one will drag your score down. Great theme for players who like a visual challenge.
+```bash
+# Set environment variables (Windows)
+set SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/whackamole_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+set SPRING_DATASOURCE_USERNAME=root
+set SPRING_DATASOURCE_PASSWORD=yourpassword
 
-| | Target |
-|--|--------|
-| ✅ Correct | 🐙 Octopus |
-| ❌ Wrong | 🦑 Squid |
+# Run
+cd whack-a-hole-game/backend
+./mvnw spring-boot:run
+```
 
----
+Backend starts at `http://localhost:8080`.
 
-### 🍭 Candy
-A sweet and colourful theme perfect for a lighter game session. Lollipops are popping up everywhere and you need to grab them fast. Hard candies are the imposters here — they look tempting but cost you points. Easiest theme to distinguish visually.
+### 2 — Open the frontend
 
-| | Target |
-|--|--------|
-| ✅ Correct | 🍭 Lollipop |
-| ❌ Wrong | 🍬 Hard Candy |
+```bash
+# Option A: serve directly
+npx serve whack-a-hole-game/frontend
 
----
-
-## ⚡ Difficulty Levels
-
-There are 3 difficulty levels. The difference between them is how long a target stays visible and how frequently new targets spawn. Higher difficulty = faster targets + less time to react.
-
----
-
-### 🟢 Easy
-
-Targets stay on screen for **3 seconds** and new ones appear every **2.5 seconds**. This gives you enough time to look at both targets if two appear at once, identify the correct one, and click it without rushing. Recommended for first-time players or anyone warming up.
-
-**Rules:**
-- Target visible for: 3 seconds
-- New target spawns every: 2.5 seconds
-- Up to 2 targets at once
-- Same scoring as all levels (+10 / −10)
+# Option B: VS Code Live Server
+# Right-click index.html → Open with Live Server
+```
 
 ---
 
-### � Medium
+## 🐳 Docker
 
-Targets stay for **2.5 seconds** and spawn every **2 seconds**. The pace picks up noticeably — you'll need to react faster and can't afford to hesitate. Two targets appearing simultaneously becomes more common, and you'll need to make quick decisions about which one to hit first.
+```bash
+docker-compose up --build
+```
 
-**Rules:**
-- Target visible for: 2.5 seconds
-- New target spawns every: 2 seconds
-- Up to 2 targets at once
-- Misreads are more costly at this pace
+Starts MySQL + Spring Boot backend together. Then open `frontend/index.html`.
 
 ---
 
-### 🔴 Hard
+## ☁️ Deployment
 
-Targets only stay for **2 seconds** and spawn every **1.5 seconds**. At this level the board is almost always active with targets appearing and disappearing rapidly. You have very little time to think — muscle memory and pattern recognition take over. One wrong click can undo two correct ones.
+### Frontend — Netlify
+1. Drag the `frontend/` folder to [app.netlify.com](https://app.netlify.com/)
+2. No build step needed — pure static files
 
-**Rules:**
-- Target visible for: 2 seconds
-- New target spawns every: 1.5 seconds
-- Up to 2 targets at once
-- Mistakes are punishing — one wrong hit = −10, same as a correct hit earns
-
----
-
-## 📊 Scoring Rules
-
-| Action | Points |
-|--------|--------|
-| Hit the correct target | **+10** |
-| Hit the wrong target | **−10** |
-| Target disappears (miss) | **0** |
-| Click an empty hole | **0** |
-
-- Your score **can go negative** if you keep hitting wrong targets
-- There is no bonus for speed — only accuracy matters
-- The game always runs for exactly **45 seconds** regardless of score
-- After saving, the game compares your score to your previous best and shows one of four messages:
-  - 🎉 **New High Score** — beat your personal best
-  - 💪 **Same as your best** — matched it exactly
-  - 💜 **Keep trying** — below your best
-  - 🎮 **First score** — your first ever submission
+### Backend — Render
+1. Push the repo to GitHub
+2. Create a new **Web Service** on Render, point to `/whack-a-hole-game/backend`
+3. Set build command: `./mvnw package -DskipTests`
+4. Set start command: `java -jar target/*.jar`
+5. Add environment variables for DB connection
 
 ---
 
-## 🏆 Leaderboard
+## 🔌 API Reference
 
-- Displays the **top 10 scores** across all players globally
-- Visible as a side panel during gameplay
-- Auto-refreshes every **10 seconds** while a game is active
-- Can be manually refreshed with the **🔄 Refresh** button
-- Top 3 positions show 🥇 🥈 🥉 medals
-- Logged-in users can see their **personal best** on the lobby screen before starting
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Server health check |
+| `POST` | `/api/auth/signup` | Register a new user |
+| `POST` | `/api/auth/login` | Login with credentials |
+| `GET` | `/api/auth/profile/:id` | Get user profile |
+| `PUT` | `/api/auth/profile/:id` | Update user profile |
+| `POST` | `/api/scores` | Submit a game score |
+| `GET` | `/api/leaderboard` | Top 10 scores |
 
 ---
 
-## 💡 Tips & Strategy
+## ⚙️ Environment Variables
 
-- **Identify before you click** — glance at both targets when two appear. One wrong click costs as much as a correct one earns.
-- **Focus on correct targets only** — ignoring a wrong target costs nothing. Hitting it costs 10 points.
-- **On Hard mode, prioritise** — if two targets appear, go for the correct one immediately and let the wrong one disappear.
-- **Don't panic near the end** — the last 10 seconds feel rushed but the scoring rules don't change. Stay accurate.
-- **Guest scores still count** — you can top the leaderboard as a guest, just enter a memorable name at game over.
-- **Space theme is the hardest visually** — 👽 and 👾 look very similar at speed. If you're new, start with Candy or Classic.
+| Variable | Default | Description |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/whackamole_db` | MySQL connection |
+| `SPRING_DATASOURCE_USERNAME` | `root` | DB username |
+| `SPRING_DATASOURCE_PASSWORD` | `root` | DB password |
+| `PORT` | `8080` | Server port |
 
 ---
 
@@ -299,74 +277,60 @@ whack-a-hole-game/
 │   │   ├── repository/     UserRepository, ScoreRepository
 │   │   ├── dto/            LoginRequest, SignupRequest, ScoreRequest, UserResponse
 │   │   ├── config/         WebConfig (CORS)
-│   │   ├── service/        (extend here)
-│   │   ├── exception/      (extend here)
 │   │   └── WhackAMoleApplication.java
-│   ├── src/main/resources/
-│   │   └── application.properties
-│   ├── Dockerfile
 │   └── pom.xml
 ├── frontend/
-│   ├── index.html          Single-page app — auth + all game screens
-│   ├── style.css           All styles and animations
-│   ├── script.js           All game logic, auth, leaderboard
-│   └── assets/             images / sounds / icons
+│   ├── index.html          Single-page app
+│   ├── style.css           All styles + animations
+│   ├── script.js           Game logic, auth, leaderboard, achievements
+│   ├── manifest.json       PWA manifest
+│   ├── sitemap.xml         SEO sitemap
+│   ├── robots.txt          Search crawler config
+│   ├── capacitor.config.json  Mobile wrapper config
+│   └── assets/             icons / images / sounds
 ├── docs/
 │   ├── screenshots/
 │   ├── architecture/
 │   └── api-docs/
 ├── docker-compose.yml
+├── Dockerfile
 ├── LICENSE
 └── README.md
 ```
 
 ---
 
-## 🔌 API Reference
+## 🔍 SEO Features
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Server health check |
-| POST | `/api/auth/signup` | Register a new user |
-| POST | `/api/auth/login` | Login with username + password |
-| GET | `/api/auth/profile/:id` | Get user profile |
-| PUT | `/api/auth/profile/:id` | Update user profile |
-| POST | `/api/scores` | Submit a score |
-| GET | `/api/leaderboard` | Get top 10 scores |
+- Full meta tags (description, keywords, author, robots)
+- Open Graph tags for social sharing
+- Twitter Card tags
+- JSON-LD structured data (`VideoGame` schema)
+- Canonical URL tag
+- `sitemap.xml` and `robots.txt`
+- PWA `manifest.json` with `theme-color`
 
 ---
 
-## 🛠 Tech Stack
+## 🚦 Performance Features
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | Java 17, Spring Boot 3.2, Spring Data JPA |
-| Database | MySQL 8 |
-| Frontend | HTML5, CSS3, Vanilla JavaScript |
-| Fonts | Orbitron, Inter (Google Fonts) |
-| Build | Maven |
-| Deploy | Docker / systemd / Netlify |
+- Zero external JS dependencies — pure Vanilla JS
+- CSS custom properties for theme-consistent design
+- CSS animations via `@keyframes` — no JS animation libraries
+- Backend warm-up progress bar for Render cold starts
+- LocalStorage for instant stats access (no extra API calls)
+- Leaderboard auto-refresh only while game is active
 
 ---
 
-## 🐳 Run with Docker
+## 🗺 Roadmap
 
-```bash
-docker-compose up --build
-```
-
-Starts MySQL and the Spring Boot backend together. Then open `frontend/index.html` in your browser.
-
----
-
-## ⚙️ Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/whackamole_db` | MySQL connection URL |
-| `SPRING_DATASOURCE_USERNAME` | `root` | Database username |
-| `SPRING_DATASOURCE_PASSWORD` | `root` | Database password |
-| `PORT` | `8080` | Backend server port |
+- [ ] Sound effects (hit, miss, combo, achievement)
+- [ ] Multiplayer race mode
+- [ ] Animated mole spritesheet instead of emoji
+- [ ] Per-user achievement history on profile page
+- [ ] Weekly leaderboard reset
+- [ ] Mobile haptic feedback via Capacitor
 
 ---
 
