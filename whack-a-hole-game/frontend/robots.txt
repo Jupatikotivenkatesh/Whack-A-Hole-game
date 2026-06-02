@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://6a08391a4e797113d59cf528--lustrous-medovik-6f47cc.netlify.app/sitemap.xml
+
+Sitemap: https://molemayhem-game.netlify.app/sitemap.xml
